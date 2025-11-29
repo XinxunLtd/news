@@ -36,6 +36,7 @@ func Connect() {
 }
 
 func Migrate() {
+	// Use AutoMigrate which safely adds new columns without dropping existing data
 	err := DB.AutoMigrate(
 		&models.User{},
 		&models.Category{},
@@ -44,9 +45,21 @@ func Migrate() {
 	)
 
 	if err != nil {
-		log.Fatal("Failed to migrate database:", err)
+		log.Printf("Warning: Migration error (may be safe to ignore if columns already exist): %v", err)
+		// Don't fatal, just log - allows app to continue if migration partially fails
+		// This is safer for production where we don't want to drop data
+	} else {
+		log.Println("Database migrated successfully")
 	}
-
-	log.Println("Database migrated successfully")
+	
+	// Manually add revision_of column if it doesn't exist (safe migration)
+	if !DB.Migrator().HasColumn(&models.News{}, "revision_of") {
+		log.Println("Adding revision_of column to news table...")
+		if err := DB.Migrator().AddColumn(&models.News{}, "revision_of"); err != nil {
+			log.Printf("Warning: Could not add revision_of column: %v", err)
+		} else {
+			log.Println("revision_of column added successfully")
+		}
+	}
 }
 

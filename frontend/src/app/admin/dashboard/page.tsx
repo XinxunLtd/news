@@ -80,10 +80,10 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex overflow-x-hidden">
       <AdminSidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto px-6 py-8">
+      <div className="flex-1 overflow-auto overflow-x-hidden">
+        <div className="container mx-auto px-6 py-8 max-w-full">
             <div className="mb-8">
               <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard Admin</h1>
               <p className="text-gray-600">Kelola artikel, kategori, dan publisher</p>
