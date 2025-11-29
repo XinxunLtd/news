@@ -129,7 +129,7 @@ sudo nano .env.local
 Isi dengan:
 
 ```env
-NEXT_PUBLIC_API_URL=https://api.news.xinxun.us/api
+NEXT_PUBLIC_API_URL=https://api-news.xinxun.us/api
 NEXT_PUBLIC_SITE_URL=https://news.xinxun.us
 ```
 
@@ -178,7 +178,7 @@ server {
 # Backend API
 server {
     listen 80;
-    server_name api.news.xinxun.us;
+    server_name api-news.xinxun.us;
 
     location / {
         proxy_pass http://localhost:8080;
@@ -209,7 +209,7 @@ sudo systemctl restart nginx
 sudo certbot --nginx -d news.xinxun.us
 
 # Untuk backend API
-sudo certbot --nginx -d api.news.xinxun.us
+sudo certbot --nginx -d api-news.xinxun.us
 
 # Atau jika backend di path yang sama, cukup satu domain
 ```
@@ -265,16 +265,16 @@ server {
 # Backend API
 server {
     listen 80;
-    server_name api.news.xinxun.us;
+    server_name api-news.xinxun.us;
     return 301 https://$server_name$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name api.news.xinxun.us;
+    server_name api-news.xinxun.us;
 
-    ssl_certificate /etc/letsencrypt/live/api.news.xinxun.us/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/api.news.xinxun.us/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/api-news.xinxun.us/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api-news.xinxun.us/privkey.pem;
     
     # SSL Configuration
     ssl_protocols TLSv1.2 TLSv1.3;

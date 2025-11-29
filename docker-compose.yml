@@ -58,7 +58,7 @@ services:
       - "3000:3000"
     environment:
       API_URL: http://backend:8080/api
-      NEXT_PUBLIC_API_URL: https://api.news.xinxun.us/api
+      NEXT_PUBLIC_API_URL: https://api-news.xinxun.us/api
       NEXT_PUBLIC_SITE_URL: https://news.xinxun.us
     depends_on:
       backend:

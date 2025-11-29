@@ -117,7 +117,7 @@ Lihat [how-to-run.md](./how-to-run.md) untuk panduan lengkap deployment di VPS.
 
 ### Production URLs
 - Frontend: https://news.xinxun.us
-- Backend API: https://api.news.xinxun.us/api
+- Backend API: https://api-news.xinxun.us/api
 
 ### API Endpoints
 
