@@ -17,6 +17,12 @@ func (r *UserRepository) FindByUsername(username string) (*models.User, error) {
 	return &user, err
 }
 
+func (r *UserRepository) FindByUsernameOrXinxunNumber(username string, xinxunNumber string) (*models.User, error) {
+	var user models.User
+	err := database.DB.Where("username = ? OR xinxun_number = ?", username, xinxunNumber).First(&user).Error
+	return &user, err
+}
+
 func (r *UserRepository) FindByEmail(email string) (*models.User, error) {
 	var user models.User
 	err := database.DB.Where("email = ?", email).First(&user).Error

@@ -57,67 +57,48 @@ func (h *PublisherHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Check if user exists by xinxun_number
-	user, err := h.userRepo.FindByXinxunNumber(req.Number)
+	// Check if user exists by xinxun_number OR username (to handle all cases)
+	username := "publisher_" + req.Number
+	user, err := h.userRepo.FindByUsernameOrXinxunNumber(username, req.Number)
+	
 	if err != nil {
-		// User doesn't exist by xinxun_number, check if username already exists
-		username := "publisher_" + req.Number
-		existingUser, usernameErr := h.userRepo.FindByUsername(username)
-		
-		if usernameErr == nil && existingUser != nil {
-			// Username exists but xinxun_number doesn't match - update the existing user
-			user = existingUser
-			user.XinxunNumber = req.Number
-			xinxunID := uint(xinxunResp.Data.ID)
-			user.XinxunID = &xinxunID
-			user.Name = xinxunResp.Data.Name
-			user.Balance = xinxunResp.Data.Balance
-			user.Status = xinxunResp.Data.Status
-			user.ReffCode = xinxunResp.Data.ReffCode
-			// Update password
-			hashedPassword, _ := services.HashPassword(req.Password)
-			user.PasswordHash = hashedPassword
-			if err := h.userRepo.Update(user); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
-				return
-			}
-		} else {
-			// User doesn't exist at all, create new publisher
-			hashedPassword, _ := services.HashPassword(req.Password)
-			xinxunID := uint(xinxunResp.Data.ID)
-			user = &models.User{
-				Username:     username,
-				Name:         xinxunResp.Data.Name,
-				Email:        req.Number + "@xinxun.news",
-				PasswordHash: hashedPassword,
-				UserType:     models.UserTypePublisher,
-				XinxunID:     &xinxunID,
-				XinxunNumber: req.Number,
-				Balance:      xinxunResp.Data.Balance,
-				Status:       xinxunResp.Data.Status,
-				ReffCode:     xinxunResp.Data.ReffCode,
-			}
-			if err := h.userRepo.Create(user); err != nil {
-				// If still fails due to duplicate, try to find and update
-				if existingUser, findErr := h.userRepo.FindByUsername(username); findErr == nil {
-					user = existingUser
-					user.XinxunNumber = req.Number
-					xinxunID := uint(xinxunResp.Data.ID)
-					user.XinxunID = &xinxunID
-					user.Name = xinxunResp.Data.Name
-					user.Balance = xinxunResp.Data.Balance
-					user.Status = xinxunResp.Data.Status
-					user.ReffCode = xinxunResp.Data.ReffCode
-					hashedPassword, _ := services.HashPassword(req.Password)
-					user.PasswordHash = hashedPassword
-					if updateErr := h.userRepo.Update(user); updateErr != nil {
-						c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create/update user"})
-						return
-					}
-				} else {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		// User doesn't exist, create new publisher
+		hashedPassword, _ := services.HashPassword(req.Password)
+		xinxunID := uint(xinxunResp.Data.ID)
+		user = &models.User{
+			Username:     username,
+			Name:         xinxunResp.Data.Name,
+			Email:        req.Number + "@xinxun.news",
+			PasswordHash: hashedPassword,
+			UserType:     models.UserTypePublisher,
+			XinxunID:     &xinxunID,
+			XinxunNumber: req.Number,
+			Balance:      xinxunResp.Data.Balance,
+			Status:       xinxunResp.Data.Status,
+			ReffCode:     xinxunResp.Data.ReffCode,
+		}
+		if err := h.userRepo.Create(user); err != nil {
+			// If create fails (likely duplicate), try to find and update
+			existingUser, findErr := h.userRepo.FindByUsernameOrXinxunNumber(username, req.Number)
+			if findErr == nil && existingUser != nil {
+				user = existingUser
+				// Update all fields
+				user.XinxunNumber = req.Number
+				xinxunID := uint(xinxunResp.Data.ID)
+				user.XinxunID = &xinxunID
+				user.Name = xinxunResp.Data.Name
+				user.Balance = xinxunResp.Data.Balance
+				user.Status = xinxunResp.Data.Status
+				user.ReffCode = xinxunResp.Data.ReffCode
+				hashedPassword, _ := services.HashPassword(req.Password)
+				user.PasswordHash = hashedPassword
+				if updateErr := h.userRepo.Update(user); updateErr != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user: " + updateErr.Error()})
 					return
 				}
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user: " + err.Error()})
+				return
 			}
 		}
 	} else {
@@ -128,13 +109,15 @@ func (h *PublisherHandler) Login(c *gin.Context) {
 		user.ReffCode = xinxunResp.Data.ReffCode
 		xinxunID := uint(xinxunResp.Data.ID)
 		user.XinxunID = &xinxunID
-		// Update password if provided
-		if req.Password != "" {
-			hashedPassword, _ := services.HashPassword(req.Password)
-			user.PasswordHash = hashedPassword
+		// Ensure xinxun_number is set
+		if user.XinxunNumber == "" {
+			user.XinxunNumber = req.Number
 		}
+		// Update password
+		hashedPassword, _ := services.HashPassword(req.Password)
+		user.PasswordHash = hashedPassword
 		if err := h.userRepo.Update(user); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user: " + err.Error()})
 			return
 		}
 	}
