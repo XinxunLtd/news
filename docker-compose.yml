@@ -1,0 +1,75 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: xinxun_news_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: vlaroot
+      MYSQL_DATABASE: xinxun_news
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./backend/db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - xinxun_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: xinxun_news_backend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: vlaroot
+      DB_NAME: xinxun_news
+      JWT_SECRET: dQgwClkDzwvyxzqEGcjxOeJFWjncEgUM
+      PORT: 8080
+      CORS_ORIGIN: https://news.xinxun.us
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION:-ap-southeast-1}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/uploads:/root/uploads
+    networks:
+      - xinxun_network
+    command: sh -c "sleep 5 && ./main"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: xinxun_news_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      API_URL: http://backend:8080/api
+      NEXT_PUBLIC_API_URL: https://api-news.xinxun.us/api
+      NEXT_PUBLIC_SITE_URL: https://news.xinxun.us
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - xinxun_network
+
+volumes:
+  db_data:
+
+networks:
+  xinxun_network:
+    driver: bridge
+
