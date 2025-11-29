@@ -35,28 +35,44 @@ func (r *UserRepository) Create(user *models.User) error {
 
 // FirstOrCreate finds a user by username or xinxun_number, or creates if not found
 // Returns the existing user if found, or creates new one
+// Uses Unscoped to check including soft-deleted records to avoid duplicates
 func (r *UserRepository) FirstOrCreate(user *models.User, username string, xinxunNumber string) (*models.User, error) {
 	var existing models.User
-	err := database.DB.Where("username = ? OR xinxun_number = ?", username, xinxunNumber).First(&existing).Error
+	
+	// First check without soft delete filter (Unscoped) to catch all users including soft-deleted
+	err := database.DB.Unscoped().Where("username = ? OR xinxun_number = ?", username, xinxunNumber).First(&existing).Error
 	
 	if err != nil {
-		// User doesn't exist, try to create it
+		// User doesn't exist at all (including soft-deleted), try to create it
 		createErr := database.DB.Create(user).Error
 		if createErr != nil {
-			// If create fails (likely duplicate due to race condition), try to find again
+			// If create fails (likely duplicate due to race condition), try to find again with Unscoped
 			var found models.User
-			findErr := database.DB.Where("username = ? OR xinxun_number = ?", username, xinxunNumber).First(&found).Error
+			findErr := database.DB.Unscoped().Where("username = ? OR xinxun_number = ?", username, xinxunNumber).First(&found).Error
 			if findErr != nil {
-				return nil, createErr // Return original create error
+				// Still not found, return original create error
+				return nil, createErr
 			}
-			// User was created by another request, return it
+			// User was created by another request, restore if soft-deleted
+			if found.DeletedAt.Valid {
+				database.DB.Unscoped().Model(&found).Update("deleted_at", nil)
+			}
+			// Reload to get updated record
+			database.DB.First(&found, found.ID)
 			return &found, nil
 		}
 		// Successfully created
 		return user, nil
 	}
 	
-	// User exists, return it
+	// User exists (including soft-deleted), restore if soft-deleted
+	if existing.DeletedAt.Valid {
+		database.DB.Unscoped().Model(&existing).Update("deleted_at", nil)
+		// Reload to get updated record
+		database.DB.First(&existing, existing.ID)
+	}
+	
+	// Return existing user
 	return &existing, nil
 }
 

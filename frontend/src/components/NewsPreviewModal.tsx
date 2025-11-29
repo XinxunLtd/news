@@ -6,10 +6,12 @@ import { formatDate } from '@/lib/utils'
 import { FiX, FiClock, FiEye } from 'react-icons/fi'
 import type { Category, User, Tag } from '@/types'
 
+import type { News } from '@/types'
+
 interface NewsPreviewModalProps {
   isOpen: boolean
   onClose: () => void
-  news: {
+  news: News | {
     title: string
     content: string
     excerpt: string
@@ -24,6 +26,26 @@ interface NewsPreviewModalProps {
 
 export default function NewsPreviewModal({ isOpen, onClose, news }: NewsPreviewModalProps) {
   if (!isOpen) return null
+
+  // Normalize news data
+  const newsData: News = 'id' in news ? news : {
+    id: 0,
+    title: news.title,
+    slug: 'preview',
+    content: news.content,
+    excerpt: news.excerpt,
+    thumbnail: news.thumbnail,
+    category_id: news.category.id,
+    category: news.category,
+    author_id: news.author?.id || 0,
+    author: news.author || { id: 0, username: 'Preview', name: 'Preview', email: 'preview@example.com' },
+    tags: news.tags || [],
+    published_at: news.created_at || new Date().toISOString(),
+    views: news.views || 0,
+    status: 'published',
+    created_at: news.created_at || new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }
 
   return (
     <>
@@ -52,36 +74,30 @@ export default function NewsPreviewModal({ isOpen, onClose, news }: NewsPreviewM
             {/* Header */}
             <header className="mb-8">
               <span className="inline-block px-3 py-1 bg-[#fe7d17] text-white rounded-full text-sm font-semibold mb-4">
-                {news.category.name}
+                {newsData.category.name}
               </span>
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                {news.title}
+                {newsData.title}
               </h1>
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
-                {news.created_at && (
-                  <span className="flex items-center space-x-1">
-                    <FiClock className="w-4 h-4" />
-                    <span>{formatDate(news.created_at)}</span>
-                  </span>
-                )}
-                {news.views !== undefined && (
-                  <span className="flex items-center space-x-1">
-                    <FiEye className="w-4 h-4" />
-                    <span>{news.views} views</span>
-                  </span>
-                )}
-                {news.author && (
-                  <span>Oleh {news.author.name || news.author.username}</span>
-                )}
+                <span className="flex items-center space-x-1">
+                  <FiClock className="w-4 h-4" />
+                  <span>{formatDate(newsData.published_at || newsData.created_at)}</span>
+                </span>
+                <span className="flex items-center space-x-1">
+                  <FiEye className="w-4 h-4" />
+                  <span>{newsData.views} views</span>
+                </span>
+                <span>Oleh {newsData.author.name || newsData.author.username}</span>
               </div>
             </header>
 
             {/* Featured Image */}
-            {news.thumbnail ? (
+            {newsData.thumbnail ? (
               <div className="relative h-64 md:h-96 mb-8 rounded-lg overflow-hidden">
                 <Image
-                  src={news.thumbnail}
-                  alt={news.title}
+                  src={newsData.thumbnail}
+                  alt={newsData.title}
                   fill
                   className="object-cover"
                   priority
@@ -96,15 +112,15 @@ export default function NewsPreviewModal({ isOpen, onClose, news }: NewsPreviewM
             {/* Content */}
             <div
               className="prose prose-lg max-w-none mb-12"
-              dangerouslySetInnerHTML={{ __html: news.content }}
+              dangerouslySetInnerHTML={{ __html: newsData.content }}
             />
 
             {/* Tags */}
-            {news.tags && news.tags.length > 0 && (
+            {newsData.tags && newsData.tags.length > 0 && (
               <div className="mb-12">
                 <h3 className="text-lg font-semibold mb-4">Tags:</h3>
                 <div className="flex flex-wrap gap-2">
-                  {news.tags.map((tag) => (
+                  {newsData.tags.map((tag) => (
                     <span
                       key={tag.id}
                       className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"

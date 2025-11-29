@@ -16,7 +16,7 @@ export default function PublisherLayout({
         <PublisherSidebar />
         <div className="flex-1 flex flex-col md:ml-64 overflow-x-hidden">
           <PublisherHeader />
-          <main className="flex-1 overflow-auto overflow-x-hidden">
+          <main className="flex-1 overflow-auto overflow-x-hidden pt-4">
             {children}
           </main>
           <PublisherFooter />

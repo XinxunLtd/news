@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { newsApi, publisherApi } from '@/lib/api'
 import type { News } from '@/types'
-import { FiEdit, FiTrash2, FiTrendingUp, FiFileText, FiClock, FiEye, FiX } from 'react-icons/fi'
+import { FiEdit, FiTrash2, FiTrendingUp, FiFileText, FiClock, FiEye, FiX, FiEye as FiPreview } from 'react-icons/fi'
+import { useState } from 'react'
+import NewsPreviewModal from '@/components/NewsPreviewModal'
 import toast from 'react-hot-toast'
 
 interface PublisherStatistics {
@@ -21,6 +23,8 @@ export default function PublisherDashboard() {
   const [news, setNews] = useState<News[]>([])
   const [statistics, setStatistics] = useState<PublisherStatistics | null>(null)
   const [loading, setLoading] = useState(true)
+  const [previewNews, setPreviewNews] = useState<News | null>(null)
+  const [showPreview, setShowPreview] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -165,7 +169,8 @@ export default function PublisherDashboard() {
             <p className="text-gray-600">Belum ada artikel. Buat artikel pertama Anda!</p>
           </div>
         ) : (
-          <table className="min-w-full divide-y divide-gray-200">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -216,15 +221,27 @@ export default function PublisherDashboard() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
+                      <button
+                        onClick={() => {
+                          setPreviewNews(item)
+                          setShowPreview(true)
+                        }}
+                        className="text-blue-600 hover:text-blue-800"
+                        title="Preview"
+                      >
+                        <FiPreview className="w-5 h-5" />
+                      </button>
                       <Link
                         href={`/publisher/news/${item.id}/edit`}
                         className="text-[#fe7d17] hover:text-[#e66d0f]"
+                        title="Edit"
                       >
                         <FiEdit className="w-5 h-5" />
                       </Link>
                       <button
                         onClick={() => handleDelete(item.id)}
                         className="text-red-600 hover:text-red-800"
+                        title="Delete"
                       >
                         <FiTrash2 className="w-5 h-5" />
                       </button>
@@ -234,8 +251,21 @@ export default function PublisherDashboard() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
+
+      {/* Preview Modal */}
+      {showPreview && previewNews && (
+        <NewsPreviewModal
+          isOpen={showPreview}
+          onClose={() => {
+            setShowPreview(false)
+            setPreviewNews(null)
+          }}
+          news={previewNews}
+        />
+      )}
     </div>
   )
 }

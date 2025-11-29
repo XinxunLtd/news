@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { newsApi, adminApi } from '@/lib/api'
 import type { News } from '@/types'
-import { FiEdit, FiTrash2, FiTrendingUp, FiFileText, FiClock, FiEye, FiUsers } from 'react-icons/fi'
+import { FiEdit, FiTrash2, FiTrendingUp, FiFileText, FiClock, FiEye, FiUsers, FiEye as FiPreview } from 'react-icons/fi'
+import { useState } from 'react'
+import NewsPreviewModal from '@/components/NewsPreviewModal'
 import toast from 'react-hot-toast'
 
 interface Statistics {
@@ -22,6 +24,8 @@ export default function AdminDashboard() {
   const [news, setNews] = useState<News[]>([])
   const [statistics, setStatistics] = useState<Statistics | null>(null)
   const [loading, setLoading] = useState(true)
+  const [previewNews, setPreviewNews] = useState<News | null>(null)
+  const [showPreview, setShowPreview] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -80,14 +84,14 @@ export default function AdminDashboard() {
 
   return (
     <div className="container mx-auto px-6 py-8 max-w-full">
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard Admin</h1>
-              <p className="text-gray-600">Kelola artikel, kategori, dan publisher</p>
-            </div>
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard Admin</h1>
+        <p className="text-gray-600">Kelola artikel, kategori, dan publisher</p>
+      </div>
 
-            {/* Statistics Cards */}
-            {statistics && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* Statistics Cards */}
+      {statistics && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
                   <div className="flex items-center justify-between">
                     <div>
@@ -124,12 +128,12 @@ export default function AdminDashboard() {
                     <FiUsers className="w-12 h-12 text-purple-500" />
                   </div>
                 </div>
-              </div>
-            )}
+        </div>
+      )}
 
-            {/* Top News Section */}
-            {statistics && statistics.top_news.length > 0 && (
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+      {/* Top News Section */}
+      {statistics && statistics.top_news.length > 0 && (
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
                 <div className="flex items-center space-x-2 mb-4">
                   <FiTrendingUp className="w-6 h-6 text-[#fe7d17]" />
                   <h2 className="text-xl font-semibold text-gray-900">Top 5 Artikel Terpopuler</h2>
@@ -150,14 +154,15 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-            )}
-
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="px-6 py-4 bg-gradient-to-r from-[#fe7d17] to-[#e66d0f]">
-            <h2 className="text-xl font-semibold text-white">Daftar Artikel</h2>
           </div>
+        </div>
+      )}
+
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="px-6 py-4 bg-gradient-to-r from-[#fe7d17] to-[#e66d0f]">
+          <h2 className="text-xl font-semibold text-white">Daftar Artikel</h2>
+        </div>
+        <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-100">
               <tr>
@@ -215,15 +220,27 @@ export default function AdminDashboard() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
+                      <button
+                        onClick={() => {
+                          setPreviewNews(item)
+                          setShowPreview(true)
+                        }}
+                        className="text-blue-600 hover:text-blue-800"
+                        title="Preview"
+                      >
+                        <FiPreview className="w-5 h-5" />
+                      </button>
                       <Link
                         href={`/admin/news/${item.id}/edit`}
                         className="text-[#fe7d17] hover:text-[#e66d0f]"
+                        title="Edit"
                       >
                         <FiEdit className="w-5 h-5" />
                       </Link>
                       <button
                         onClick={() => handleDelete(item.id)}
                         className="text-red-600 hover:text-red-800"
+                        title="Delete"
                       >
                         <FiTrash2 className="w-5 h-5" />
                       </button>
@@ -234,6 +251,19 @@ export default function AdminDashboard() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Preview Modal */}
+      {showPreview && previewNews && (
+        <NewsPreviewModal
+          isOpen={showPreview}
+          onClose={() => {
+            setShowPreview(false)
+            setPreviewNews(null)
+          }}
+          news={previewNews}
+        />
+      )}
     </div>
   )
 }
