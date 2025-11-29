@@ -262,9 +262,121 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 		return
 	}
 
+	userID, _ := c.Get("user_id")
+	userType, _ := c.Get("user_type")
+
+	// Check if user owns this news (for publisher)
+	if userType == string(models.UserTypePublisher) && news.AuthorID != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You can only edit your own news"})
+		return
+	}
+
 	var req UpdateNewsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// If publisher is editing a published news, create a new revision instead of updating directly
+	if userType == string(models.UserTypePublisher) && news.Status == models.StatusPublished {
+		// Create new revision with pending status
+		newsSlug := slug.Make(req.Title)
+		if req.Title == "" {
+			newsSlug = news.Slug
+		}
+		// Ensure unique slug
+		existing, _ := h.newsRepo.FindBySlug(newsSlug)
+		if existing != nil && existing.ID != news.ID {
+			newsSlug = newsSlug + "-" + strconv.FormatInt(time.Now().Unix(), 10)
+		}
+
+		revision := &models.News{
+			Title:      req.Title,
+			Slug:       newsSlug,
+			Content:    req.Content,
+			Excerpt:    req.Excerpt,
+			Thumbnail:  req.Thumbnail,
+			CategoryID: req.CategoryID,
+			AuthorID:   news.AuthorID,
+			Status:     models.StatusPending,
+			RevisionOf: &news.ID, // Link to original
+		}
+
+		if req.Title == "" {
+			revision.Title = news.Title
+		}
+		if req.Content == "" {
+			revision.Content = news.Content
+		}
+		if req.Excerpt == "" {
+			revision.Excerpt = news.Excerpt
+		}
+		if req.Thumbnail == "" {
+			revision.Thumbnail = news.Thumbnail
+		}
+		if req.CategoryID == 0 {
+			revision.CategoryID = news.CategoryID
+		}
+
+		// Validate category access
+		if req.CategoryID > 0 {
+			category, err := h.categoryRepo.FindByID(req.CategoryID)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Category not found"})
+				return
+			}
+			if category.IsAdminOnly {
+				c.JSON(http.StatusForbidden, gin.H{"error": "This category is restricted to admin only"})
+				return
+			}
+		}
+
+		// Validate title length
+		if req.Title != "" {
+			titleWords := strings.Fields(strings.TrimSpace(req.Title))
+			if len(titleWords) > 100 {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Title must not exceed 100 words"})
+				return
+			}
+		}
+
+		// Validate excerpt length
+		if req.Excerpt != "" {
+			excerptWords := strings.Fields(strings.TrimSpace(req.Excerpt))
+			if len(excerptWords) > 200 {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Excerpt must not exceed 200 words"})
+				return
+			}
+		}
+
+		// Set tags
+		if len(req.TagIDs) > 0 {
+			var tags []models.Tag
+			for _, tagID := range req.TagIDs {
+				tags = append(tags, models.Tag{ID: tagID})
+			}
+			revision.Tags = tags
+		} else {
+			// Copy tags from original
+			revision.Tags = news.Tags
+		}
+
+		if err := h.newsRepo.Create(revision); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Reload with relations
+		createdRevision, err := h.newsRepo.FindByID(revision.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusCreated, gin.H{
+			"message": "Revision created. Waiting for admin approval.",
+			"data":    createdRevision,
+		})
 		return
 	}
 

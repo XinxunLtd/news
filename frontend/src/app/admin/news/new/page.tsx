@@ -2,16 +2,20 @@
 
 import { useState, useEffect, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
-import { categoryApi, adminApi, adminCategoryApi } from '@/lib/api'
-import type { Category } from '@/types'
+import { categoryApi, adminApi, adminCategoryApi, tagApi } from '@/lib/api'
+import type { Category, Tag } from '@/types'
 import toast from 'react-hot-toast'
 import RichTextEditor from '@/components/RichTextEditor'
 import Image from 'next/image'
 import AdminSidebar from '@/components/AdminSidebar'
+import NewsPreviewModal from '@/components/NewsPreviewModal'
 
 export default function NewNewsPage() {
   const [categories, setCategories] = useState<Category[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([])
   const [loading, setLoading] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -31,18 +35,22 @@ export default function NewNewsPage() {
       return
     }
 
-    loadCategories()
+    loadData()
   }, [router])
 
-  const loadCategories = async () => {
+  const loadData = async () => {
     try {
-      const response = await adminCategoryApi.getAll()
-      setCategories(response.data)
-      if (response.data.length > 0) {
-        setFormData((prev) => ({ ...prev, category_id: response.data[0].id }))
+      const [categoriesResponse, tagsResponse] = await Promise.all([
+        adminCategoryApi.getAll(),
+        tagApi.getAll(),
+      ])
+      setCategories(categoriesResponse.data)
+      setTags(tagsResponse.data)
+      if (categoriesResponse.data.length > 0) {
+        setFormData((prev) => ({ ...prev, category_id: categoriesResponse.data[0].id }))
       }
     } catch (error) {
-      toast.error('Gagal memuat kategori')
+      toast.error('Gagal memuat data')
     }
   }
 
@@ -77,10 +85,33 @@ export default function NewNewsPage() {
     setLoading(true)
 
     try {
-      // Upload all content images first
+      const token = localStorage.getItem('admin_token')
+      if (!token) {
+        toast.error('Anda tidak terautentikasi')
+        router.push('/admin/login')
+        return
+      }
+
+      // Upload thumbnail first if new file selected
+      let finalThumbnail = formData.thumbnail
+      if (thumbnailFile) {
+        const formDataUpload = new FormData()
+        formDataUpload.append('image', thumbnailFile)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/upload`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formDataUpload,
+        })
+        if (!response.ok) throw new Error('Upload thumbnail gagal')
+        const data = await response.json()
+        finalThumbnail = data.url
+      }
+
+      // Upload all content images
       let finalContent = formData.content
       if (contentImages.size > 0) {
-        const token = localStorage.getItem('admin_token')
         const uploadPromises = Array.from(contentImages.entries()).map(async ([base64, file]) => {
           const formData = new FormData()
           formData.append('image', file)
@@ -104,8 +135,13 @@ export default function NewNewsPage() {
         })
       }
 
-      // Submit with updated content
-      await adminApi.createNews({ ...formData, content: finalContent })
+      // Submit with updated content, thumbnail, and tags
+      await adminApi.createNews({
+        ...formData,
+        content: finalContent,
+        thumbnail: finalThumbnail,
+        tag_ids: selectedTagIds,
+      })
       toast.success('Artikel berhasil dibuat!')
       router.push('/admin/dashboard')
     } catch (error: any) {
@@ -261,6 +297,38 @@ export default function NewNewsPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tags
+            </label>
+            <div className="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg min-h-[60px]">
+              {tags.length === 0 ? (
+                <p className="text-sm text-gray-500">Memuat tags...</p>
+              ) : (
+                tags.map((tag) => (
+                  <label
+                    key={tag.id}
+                    className="flex items-center space-x-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedTagIds.includes(tag.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedTagIds([...selectedTagIds, tag.id])
+                        } else {
+                          setSelectedTagIds(selectedTagIds.filter((id) => id !== tag.id))
+                        }
+                      }}
+                      className="rounded border-gray-300 text-[#fe7d17] focus:ring-[#fe7d17]"
+                    />
+                    <span className="text-sm text-gray-700">{tag.name}</span>
+                  </label>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Status
             </label>
             <select
@@ -274,6 +342,19 @@ export default function NewNewsPage() {
           </div>
 
           <div className="flex space-x-4">
+            <button
+              type="button"
+              onClick={() => {
+                if (!formData.title || !formData.content || !formData.thumbnail) {
+                  toast.error('Harap isi judul, konten, dan thumbnail terlebih dahulu')
+                  return
+                }
+                setShowPreview(true)
+              }}
+              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Preview
+            </button>
             <button
               type="submit"
               disabled={loading}
@@ -289,6 +370,23 @@ export default function NewNewsPage() {
               Batal
             </button>
           </div>
+        </form>
+
+        {/* Preview Modal */}
+        {showPreview && (
+          <NewsPreviewModal
+            isOpen={showPreview}
+            onClose={() => setShowPreview(false)}
+            news={{
+              title: formData.title,
+              content: formData.content,
+              excerpt: formData.excerpt,
+              thumbnail: formData.thumbnail,
+              category: categories.find((c) => c.id === formData.category_id) || categories[0],
+              tags: tags.filter((t) => selectedTagIds.includes(t.id)),
+            }}
+          />
+        )}
         </form>
         </div>
       </div>

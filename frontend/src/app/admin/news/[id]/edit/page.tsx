@@ -2,20 +2,24 @@
 
 import { useState, useEffect, FormEvent } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { newsApi, categoryApi, adminApi, adminCategoryApi } from '@/lib/api'
-import type { Category, News } from '@/types'
+import { newsApi, categoryApi, adminApi, adminCategoryApi, tagApi } from '@/lib/api'
+import type { Category, News, Tag } from '@/types'
 import toast from 'react-hot-toast'
 import RichTextEditor from '@/components/RichTextEditor'
 import Image from 'next/image'
 import AdminSidebar from '@/components/AdminSidebar'
+import NewsPreviewModal from '@/components/NewsPreviewModal'
 
 export default function EditNewsPage() {
   const params = useParams()
   const router = useRouter()
   const [categories, setCategories] = useState<Category[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([])
   const [news, setNews] = useState<News | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -40,9 +44,10 @@ export default function EditNewsPage() {
 
   const loadData = async () => {
     try {
-      const [newsResponse, categoriesResponse] = await Promise.all([
+      const [newsResponse, categoriesResponse, tagsResponse] = await Promise.all([
         adminApi.getAllNews({ page: 1, limit: 1000 }),
         adminCategoryApi.getAll(),
+        tagApi.getAll(),
       ])
 
       const foundNews = newsResponse.data.find((n) => n.id === parseInt(params.id as string))
@@ -54,6 +59,8 @@ export default function EditNewsPage() {
 
       setNews(foundNews)
       setCategories(categoriesResponse.data)
+      setTags(tagsResponse.data)
+      setSelectedTagIds(foundNews.tags?.map((t) => t.id) || [])
       setOldThumbnail(foundNews.thumbnail || '')
       setFormData({
         title: foundNews.title,
@@ -148,6 +155,7 @@ export default function EditNewsPage() {
         ...formData,
         content: finalContent,
         thumbnail: finalThumbnail,
+        tag_ids: selectedTagIds,
       })
 
       // Delete old thumbnail from S3 if changed
@@ -332,6 +340,38 @@ export default function EditNewsPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tags
+            </label>
+            <div className="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg min-h-[60px]">
+              {tags.length === 0 ? (
+                <p className="text-sm text-gray-500">Memuat tags...</p>
+              ) : (
+                tags.map((tag) => (
+                  <label
+                    key={tag.id}
+                    className="flex items-center space-x-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedTagIds.includes(tag.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedTagIds([...selectedTagIds, tag.id])
+                        } else {
+                          setSelectedTagIds(selectedTagIds.filter((id) => id !== tag.id))
+                        }
+                      }}
+                      className="rounded border-gray-300 text-[#fe7d17] focus:ring-[#fe7d17]"
+                    />
+                    <span className="text-sm text-gray-700">{tag.name}</span>
+                  </label>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Status
             </label>
             <select
@@ -340,11 +380,26 @@ export default function EditNewsPage() {
               className="input-field"
             >
               <option value="draft">Draft</option>
+              <option value="pending">Pending</option>
               <option value="published">Published</option>
+              <option value="rejected">Rejected</option>
             </select>
           </div>
 
           <div className="flex space-x-4">
+            <button
+              type="button"
+              onClick={() => {
+                if (!formData.title || !formData.content || !formData.thumbnail) {
+                  toast.error('Harap isi judul, konten, dan thumbnail terlebih dahulu')
+                  return
+                }
+                setShowPreview(true)
+              }}
+              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Preview
+            </button>
             <button
               type="submit"
               disabled={saving}
@@ -360,6 +415,23 @@ export default function EditNewsPage() {
               Batal
             </button>
           </div>
+        </form>
+
+        {/* Preview Modal */}
+        {showPreview && (
+          <NewsPreviewModal
+            isOpen={showPreview}
+            onClose={() => setShowPreview(false)}
+            news={{
+              title: formData.title,
+              content: formData.content,
+              excerpt: formData.excerpt,
+              thumbnail: formData.thumbnail,
+              category: categories.find((c) => c.id === formData.category_id) || categories[0],
+              tags: tags.filter((t) => selectedTagIds.includes(t.id)),
+            }}
+          />
+        )}
         </form>
         </div>
       </div>

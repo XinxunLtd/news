@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
-import type { NewsResponse, SingleNewsResponse, Category, News } from '@/types'
+import type { NewsResponse, SingleNewsResponse, Category, News, Tag } from '@/types'
 
 // Get API URL based on environment
 // Server-side (SSR): use service name in Docker, localhost for local dev
@@ -129,6 +129,14 @@ export const categoryApi = {
   getAll: async (): Promise<{ data: Category[] }> => {
     const apiInstance = getApi()
     const response = await apiInstance.get('/categories')
+    return response.data
+  },
+}
+
+export const tagApi = {
+  getAll: async (): Promise<{ data: Tag[] }> => {
+    const apiInstance = getApi()
+    const response = await apiInstance.get('/tags')
     return response.data
   },
 }

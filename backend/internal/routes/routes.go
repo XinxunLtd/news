@@ -56,12 +56,14 @@ func SetupRoutes() *gin.Engine {
 	{
 		newsHandler := handlers.NewNewsHandler()
 		categoryHandler := handlers.NewCategoryHandler()
+		tagHandler := handlers.NewTagHandler()
 
 		api.GET("/news", newsHandler.GetNews)
 		api.GET("/news/featured", newsHandler.GetFeaturedNews)
 		api.GET("/news/:slug", newsHandler.GetNewsBySlug)
 		api.GET("/news/search", newsHandler.SearchNews)
 		api.GET("/categories", categoryHandler.GetCategories)
+		api.GET("/tags", tagHandler.GetTags)
 	}
 
 	// Publisher routes (public)

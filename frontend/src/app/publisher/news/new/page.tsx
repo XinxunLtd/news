@@ -2,16 +2,20 @@
 
 import { useState, useEffect, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
-import { categoryApi, publisherApi } from '@/lib/api'
-import type { Category } from '@/types'
+import { categoryApi, publisherApi, tagApi } from '@/lib/api'
+import type { Category, Tag } from '@/types'
 import toast from 'react-hot-toast'
 import RichTextEditor from '@/components/RichTextEditor'
 import Image from 'next/image'
 import PublisherSidebar from '@/components/PublisherSidebar'
+import NewsPreviewModal from '@/components/NewsPreviewModal'
 
 export default function NewPublisherNewsPage() {
   const [categories, setCategories] = useState<Category[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([])
   const [loading, setLoading] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -30,20 +34,24 @@ export default function NewPublisherNewsPage() {
       return
     }
 
-    loadCategories()
+    loadData()
   }, [router])
 
-  const loadCategories = async () => {
+  const loadData = async () => {
     try {
-      const response = await categoryApi.getAll()
+      const [categoriesResponse, tagsResponse] = await Promise.all([
+        categoryApi.getAll(),
+        tagApi.getAll(),
+      ])
       // Filter out admin-only categories completely - don't show them to publisher
-      const availableCategories = response.data.filter((cat) => !cat.is_admin_only)
+      const availableCategories = categoriesResponse.data.filter((cat) => !cat.is_admin_only)
       setCategories(availableCategories) // Only show non-admin-only categories
+      setTags(tagsResponse.data)
       if (availableCategories.length > 0) {
         setFormData((prev) => ({ ...prev, category_id: availableCategories[0].id }))
       }
     } catch (error) {
-      toast.error('Gagal memuat kategori')
+      toast.error('Gagal memuat data')
     }
   }
 
@@ -128,8 +136,13 @@ export default function NewPublisherNewsPage() {
         })
       }
 
-      // Submit with updated content and thumbnail
-      await publisherApi.createNews({ ...formData, content: finalContent, thumbnail: finalThumbnail })
+      // Submit with updated content, thumbnail, and tags
+      await publisherApi.createNews({
+        ...formData,
+        content: finalContent,
+        thumbnail: finalThumbnail,
+        tag_ids: selectedTagIds,
+      })
       toast.success('Artikel berhasil dibuat! Menunggu approval admin.')
       router.push('/publisher/dashboard')
     } catch (error: any) {
@@ -283,6 +296,38 @@ export default function NewPublisherNewsPage() {
             </select>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tags
+            </label>
+            <div className="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg min-h-[60px]">
+              {tags.length === 0 ? (
+                <p className="text-sm text-gray-500">Memuat tags...</p>
+              ) : (
+                tags.map((tag) => (
+                  <label
+                    key={tag.id}
+                    className="flex items-center space-x-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedTagIds.includes(tag.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedTagIds([...selectedTagIds, tag.id])
+                        } else {
+                          setSelectedTagIds(selectedTagIds.filter((id) => id !== tag.id))
+                        }
+                      }}
+                      className="rounded border-gray-300 text-[#fe7d17] focus:ring-[#fe7d17]"
+                    />
+                    <span className="text-sm text-gray-700">{tag.name}</span>
+                  </label>
+                ))
+              )}
+            </div>
+          </div>
+
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <p className="text-sm text-yellow-800">
               <strong>Catatan:</strong> Artikel yang Anda buat akan masuk ke status "Pending" dan menunggu approval dari admin sebelum dipublikasikan.
@@ -290,6 +335,19 @@ export default function NewPublisherNewsPage() {
           </div>
 
           <div className="flex space-x-4">
+            <button
+              type="button"
+              onClick={() => {
+                if (!formData.title || !formData.content || !formData.thumbnail) {
+                  toast.error('Harap isi judul, konten, dan thumbnail terlebih dahulu')
+                  return
+                }
+                setShowPreview(true)
+              }}
+              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Preview
+            </button>
             <button
               type="submit"
               disabled={loading}
@@ -306,6 +364,22 @@ export default function NewPublisherNewsPage() {
             </button>
           </div>
           </form>
+
+          {/* Preview Modal */}
+          {showPreview && (
+            <NewsPreviewModal
+              isOpen={showPreview}
+              onClose={() => setShowPreview(false)}
+              news={{
+                title: formData.title,
+                content: formData.content,
+                excerpt: formData.excerpt,
+                thumbnail: formData.thumbnail,
+                category: categories.find((c) => c.id === formData.category_id) || categories[0],
+                tags: tags.filter((t) => selectedTagIds.includes(t.id)),
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

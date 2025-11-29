@@ -32,6 +32,7 @@ type News struct {
 	Status      NewsStatus     `json:"status" gorm:"type:enum('draft','published','pending','rejected');default:'draft'"`
 	RewardAmount float64       `json:"reward_amount" gorm:"default:0"` // Reward untuk publisher jika di-approve
 	IsRewarded  bool           `json:"is_rewarded" gorm:"default:false"` // Apakah sudah diberikan reward
+	RevisionOf  *uint          `json:"revision_of" gorm:"index"` // ID of the original news if this is a revision
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`

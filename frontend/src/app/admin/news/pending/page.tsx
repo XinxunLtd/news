@@ -6,13 +6,12 @@ import Link from 'next/link'
 import { adminApi } from '@/lib/api'
 import toast from 'react-hot-toast'
 import type { News } from '@/types'
-import { FiCheck, FiX } from 'react-icons/fi'
+import { FiCheck, FiX, FiEye } from 'react-icons/fi'
 import AdminSidebar from '@/components/AdminSidebar'
 
 export default function PendingNewsPage() {
   const [news, setNews] = useState<News[]>([])
   const [loading, setLoading] = useState(true)
-  const [processing, setProcessing] = useState<number | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -41,42 +40,6 @@ export default function PendingNewsPage() {
     }
   }
 
-  const handleApprove = async (id: number) => {
-    const rewardAmount = prompt('Masukkan jumlah reward (0 jika tidak ada reward):')
-    if (rewardAmount === null) return
-
-    const amount = parseFloat(rewardAmount) || 0
-    if (amount < 0) {
-      toast.error('Jumlah reward tidak valid')
-      return
-    }
-
-    setProcessing(id)
-    try {
-      await adminApi.approveNews(id, amount)
-      toast.success('Artikel berhasil di-approve!')
-      loadPendingNews()
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Gagal approve artikel')
-    } finally {
-      setProcessing(null)
-    }
-  }
-
-  const handleReject = async (id: number) => {
-    if (!confirm('Apakah Anda yakin ingin menolak artikel ini?')) return
-
-    setProcessing(id)
-    try {
-      await adminApi.rejectNews(id)
-      toast.success('Artikel ditolak')
-      loadPendingNews()
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Gagal reject artikel')
-    } finally {
-      setProcessing(null)
-    }
-  }
 
   if (loading) {
     return (
@@ -137,22 +100,13 @@ export default function PendingNewsPage() {
                       </div>
                     </div>
                     <div className="flex space-x-2 ml-4">
-                      <button
-                        onClick={() => handleApprove(item.id)}
-                        disabled={processing === item.id}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
+                      <Link
+                        href={`/admin/news/pending/${item.id}`}
+                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors flex items-center space-x-2"
                       >
-                        <FiCheck />
-                        <span>Approve</span>
-                      </button>
-                      <button
-                        onClick={() => handleReject(item.id)}
-                        disabled={processing === item.id}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
-                      >
-                        <FiX />
-                        <span>Reject</span>
-                      </button>
+                        <FiEye />
+                        <span>Review</span>
+                      </Link>
                     </div>
                   </div>
                 </div>

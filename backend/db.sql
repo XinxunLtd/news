@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS news (
     status ENUM('draft', 'published', 'pending', 'rejected') DEFAULT 'draft',
     reward_amount DECIMAL(15,2) DEFAULT 0.00,
     is_rewarded BOOLEAN DEFAULT FALSE,
+    revision_of BIGINT UNSIGNED NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL,
@@ -76,6 +77,7 @@ CREATE TABLE IF NOT EXISTS news (
     INDEX idx_author_id (author_id),
     INDEX idx_status (status),
     INDEX idx_published_at (published_at),
+    INDEX idx_revision_of (revision_of),
     INDEX idx_deleted_at (deleted_at),
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT,
     FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE RESTRICT

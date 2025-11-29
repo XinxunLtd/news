@@ -69,7 +69,71 @@ func (h *AdminHandler) ApproveNews(c *gin.Context) {
 		return
 	}
 
-	// Update news status to published
+	// If this is a revision, update the original news instead
+	if news.RevisionOf != nil {
+		originalNews, err := h.newsRepo.FindByID(*news.RevisionOf)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Original news not found"})
+			return
+		}
+
+		// Update original with revision data
+		originalNews.Title = news.Title
+		originalNews.Slug = news.Slug
+		originalNews.Content = news.Content
+		originalNews.Excerpt = news.Excerpt
+		originalNews.Thumbnail = news.Thumbnail
+		originalNews.CategoryID = news.CategoryID
+		originalNews.Tags = news.Tags
+		originalNews.RewardAmount = req.RewardAmount
+		now := time.Now()
+		originalNews.PublishedAt = &now
+		originalNews.Status = models.StatusPublished
+
+		if err := h.newsRepo.Update(originalNews); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Delete the revision
+		if err := h.newsRepo.Delete(news.ID); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Reload original with relations
+		updatedOriginal, err := h.newsRepo.FindByID(originalNews.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Send reward
+		if req.RewardAmount > 0 && !updatedOriginal.IsRewarded && author.XinxunID != nil {
+			rewardResp, err := services.SendReward(*author.XinxunID, req.RewardAmount)
+			if err != nil {
+				c.JSON(http.StatusOK, gin.H{
+					"message": "News approved but reward failed",
+					"error":   err.Error(),
+					"data":    updatedOriginal,
+				})
+				return
+			}
+
+			if rewardResp.Success {
+				updatedOriginal.IsRewarded = true
+				h.newsRepo.Update(updatedOriginal)
+			}
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Revision approved and original news updated successfully",
+			"data":    updatedOriginal,
+		})
+		return
+	}
+
+	// Regular approval (not a revision)
 	news.Status = models.StatusPublished
 	news.RewardAmount = req.RewardAmount
 	now := time.Now()

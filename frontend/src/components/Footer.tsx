@@ -63,19 +63,24 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Privacy Policy dan Syarat & Ketentuan*/}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Privacy Policy</h3>
-            <Link href="https://xinxun.us/privacy-policy" className="text-gray-400 hover:text-[#fe7d17] transition-colors text-sm">
+        {/* Legal Links */}
+        <div className="border-t border-gray-800 pt-8 mb-8">
+          <div className="flex flex-wrap justify-center gap-6">
+            <Link
+              href="https://xinxun.us/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-[#fe7d17] transition-colors text-sm"
+            >
               Privacy Policy
             </Link>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Terms of Service</h3>
-            <Link href="https://xinxun.us/terms-and-conditions" className="text-gray-400 hover:text-[#fe7d17] transition-colors text-sm">
+            <span className="text-gray-600">|</span>
+            <Link
+              href="https://xinxun.us/terms-and-conditions"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-[#fe7d17] transition-colors text-sm"
+            >
               Terms of Service
             </Link>
           </div>
