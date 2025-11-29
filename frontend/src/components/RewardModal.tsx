@@ -7,10 +7,11 @@ interface RewardModalProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: (amount: number) => void
+  loading?: boolean
   newsTitle?: string
 }
 
-export default function RewardModal({ isOpen, onClose, onConfirm, newsTitle }: RewardModalProps) {
+export default function RewardModal({ isOpen, onClose, onConfirm, loading = false, newsTitle }: RewardModalProps) {
   const [amount, setAmount] = useState('0')
   const [error, setError] = useState('')
 
@@ -93,15 +94,17 @@ export default function RewardModal({ isOpen, onClose, onConfirm, newsTitle }: R
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                disabled={loading}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 Batal
               </button>
               <button
                 type="submit"
-                className="flex-1 px-4 py-2 bg-[#fe7d17] text-white rounded-lg hover:bg-[#e66d0f] transition-colors"
+                disabled={loading}
+                className="flex-1 px-4 py-2 bg-[#fe7d17] text-white rounded-lg hover:bg-[#e66d0f] transition-colors disabled:opacity-50"
               >
-                Set Reward
+                {loading ? 'Memproses...' : 'Set Reward'}
               </button>
             </div>
           </form>

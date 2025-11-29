@@ -7,13 +7,11 @@ import { adminApi } from '@/lib/api'
 import toast from 'react-hot-toast'
 import type { News } from '@/types'
 import { FiCheck, FiX, FiEye } from 'react-icons/fi'
-import RewardModal from '@/components/RewardModal'
 
 export default function PendingRevisionsPage() {
   const [news, setNews] = useState<News[]>([])
   const [loading, setLoading] = useState(true)
   const [approvingId, setApprovingId] = useState<number | null>(null)
-  const [showRewardModal, setShowRewardModal] = useState(false)
   const [selectedNewsId, setSelectedNewsId] = useState<number | null>(null)
   const router = useRouter()
 
@@ -61,7 +59,6 @@ export default function PendingRevisionsPage() {
       toast.error(error.response?.data?.error || 'Gagal menyetujui artikel')
     } finally {
       setApprovingId(null)
-      setShowRewardModal(false)
       setSelectedNewsId(null)
     }
   }
@@ -166,15 +163,7 @@ export default function PendingRevisionsPage() {
         )}
       </div>
 
-      <RewardModal
-        isOpen={showRewardModal}
-        onClose={() => {
-          setShowRewardModal(false)
-          setSelectedNewsId(null)
-        }}
-        onConfirm={handleConfirmApprove}
-        loading={approvingId !== null}
-      />
+      {/* RewardModal not needed for revisions - they don't get rewards */}
     </div>
   )
 }
