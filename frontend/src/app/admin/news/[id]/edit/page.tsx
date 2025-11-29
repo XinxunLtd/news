@@ -241,9 +241,9 @@ export default function EditNewsPage() {
 
   return (
     <div className="container mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Edit Artikel</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Edit Artikel</h1>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-8 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-8 space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Judul *
@@ -428,7 +428,6 @@ export default function EditNewsPage() {
             }}
           />
         )}
-        </form>
     </div>
   )
 }
