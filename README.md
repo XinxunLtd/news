@@ -1,217 +1,157 @@
 # Xinxun News Website
 
-Aplikasi news website production-ready untuk Xinxun dengan backend Go dan frontend Next.js.
+Platform berita untuk Xinxun dengan fitur admin panel dan publisher dashboard.
 
-## 🏗️ Project Structure
+## 🚀 Tech Stack
+
+### Backend
+- **Go 1.21+** dengan Gin Framework
+- **MySQL 8.0** database
+- **GORM** untuk ORM
+- **JWT** untuk authentication
+- **AWS S3** untuk image storage
+
+### Frontend
+- **Next.js 14** (App Router)
+- **TypeScript**
+- **TailwindCSS**
+- **React Quill** untuk WYSIWYG editor
+
+### Infrastructure
+- **Docker & Docker Compose**
+- **Nginx** sebagai reverse proxy
+- **Let's Encrypt** untuk SSL
+
+## 📁 Project Structure
 
 ```
-NEWS/
-├── backend/          # Go backend (Gin, GORM, MySQL)
-├── frontend/         # Next.js frontend (App Router, TypeScript, Tailwind)
-└── docker-compose.yml
+news/
+├── backend/          # Go backend API
+│   ├── cmd/         # Main application entry
+│   ├── internal/    # Internal packages
+│   │   ├── config/  # Configuration
+│   │   ├── database/ # Database connection
+│   │   ├── handlers/ # HTTP handlers
+│   │   ├── middleware/ # Middleware (auth, etc)
+│   │   ├── models/  # Data models
+│   │   ├── repository/ # Data access layer
+│   │   ├── routes/  # API routes
+│   │   └── services/ # Business logic
+│   ├── db.sql       # Database schema
+│   └── Dockerfile
+├── frontend/         # Next.js frontend
+│   ├── src/
+│   │   ├── app/     # Next.js app router pages
+│   │   ├── components/ # React components
+│   │   ├── lib/     # Utilities & API client
+│   │   └── types/   # TypeScript types
+│   └── Dockerfile
+├── docker-compose.yml
+└── how-to-run.md    # Deployment guide
 ```
 
-## 🚀 Quick Start dengan Docker (Otomatis)
+## 🛠️ Development Setup
 
-### Cara Otomatis (Recommended)
+### Prerequisites
+- Docker & Docker Compose
+- Go 1.21+ (untuk development backend)
+- Node.js 20+ (untuk development frontend)
 
-**Windows (PowerShell):**
-```powershell
-.\setup.ps1
-```
+### Quick Start
 
-**Linux/Mac:**
+1. **Clone repository**
 ```bash
-chmod +x setup.sh
-./setup.sh
+git clone https://github.com/XinxunLtd/news.git
+cd news
 ```
 
-Script akan otomatis:
-1. ✅ Check Docker installation
-2. ✅ Setup environment files (.env)
-3. ✅ Build Docker images
-4. ✅ Start semua containers
-5. ✅ Auto-migrate database
-6. ✅ Auto-seed database (admin user + sample news)
+2. **Setup environment variables**
 
-### Cara Manual
-
-**1. Clone Repository**
-```bash
-git clone <repository-url>
-cd News
-```
-
-**2. Setup Environment Variables**
-
-**Backend:**
+Backend:
 ```bash
 cd backend
 cp .env.example .env
-# Edit .env jika perlu (default sudah sesuai untuk Docker)
+# Edit .env dengan konfigurasi yang sesuai
 ```
 
-**Frontend:**
+Frontend:
 ```bash
 cd frontend
 cp .env.example .env.local
-# Edit .env.local jika perlu
+# Edit .env.local dengan konfigurasi yang sesuai
 ```
 
-**3. Run dengan Docker Compose**
+3. **Run with Docker**
 ```bash
-docker-compose up -d --build
+docker-compose up -d
 ```
 
-**4. Database akan otomatis:**
-- ✅ Schema dibuat dari `db.sql` saat MySQL container pertama kali start
-- ✅ Migration otomatis saat backend start
-- ✅ Seed data otomatis jika admin belum ada (first run)
+4. **Access application**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8080/api
+- Health Check: http://localhost:8080/health
 
-Aplikasi akan berjalan di:
-- **Frontend:** http://localhost:3000
-- **Backend API:** http://localhost:8080
-- **MySQL:** localhost:3306
+## 📝 Default Credentials
 
-**5. (Optional) Manual Seed Database**
-Jika perlu seed ulang:
-```bash
-docker exec -it xinxun_news_backend go run seeds/seed.go
-```
-
-## 🛠️ Manual Setup
-
-### Backend Setup
-
-Lihat [backend/README.md](./backend/README.md) untuk instruksi lengkap.
-
-```bash
-cd backend
-go mod download
-# Setup .env
-go run cmd/main.go
-```
-
-### Frontend Setup
-
-Lihat [frontend/README.md](./frontend/README.md) untuk instruksi lengkap.
-
-```bash
-cd frontend
-npm install
-# Setup .env.local
-npm run dev
-```
-
-## 📋 Default Credentials
-
-**Admin Login:**
+**Admin:**
 - Username: `admin`
 - Password: `admin123`
 
-**PENTING:** Ganti password default setelah deployment!
+**⚠️ PENTING:** Ganti password default setelah deployment!
 
-## 🎨 Design
+## 🌐 Production Deployment
 
-- **Background:** White (#FFFFFF)
-- **Primary Color:** #fe7d17 (untuk buttons, links, highlights)
-- **Design:** Clean, modern, elegant seperti website news profesional
-- **Responsive:** Mobile-first design
+Lihat [how-to-run.md](./how-to-run.md) untuk panduan lengkap deployment di VPS.
 
-## ✨ Features
+### Quick Production Setup
 
-### Public Features
-- ✅ List news dengan pagination
-- ✅ Search functionality
-- ✅ Category filtering
-- ✅ News detail page
-- ✅ Related articles
-- ✅ SEO optimized (meta tags, sitemap, structured data)
-- ✅ Responsive design
+1. Setup VPS dengan Ubuntu/Debian
+2. Install Docker & Docker Compose
+3. Clone repository
+4. Setup environment variables
+5. Setup Nginx reverse proxy
+6. Setup SSL dengan Let's Encrypt
+7. Run `docker-compose up -d`
 
-### Admin Features
-- ✅ JWT Authentication
-- ✅ Dashboard dengan list semua artikel
-- ✅ Create/Edit/Delete news
-- ✅ Image upload
-- ✅ Category management
-- ✅ Draft/Published status
+## 🔗 Endpoints
 
-## 🔧 Tech Stack
+### Production URLs
+- Frontend: https://news.xinxun.us
+- Backend API: https://api-news.xinxun.us/api
 
-### Backend
-- Go 1.21+
-- Gin Web Framework
-- GORM (MySQL ORM)
-- JWT Authentication
-- Bcrypt
+### API Endpoints
 
-### Frontend
-- Next.js 14 (App Router)
-- TypeScript
-- TailwindCSS
-- React Hook Form
-- Axios
-- Next-SEO
-
-## 📡 API Endpoints
-
-### Public
-- `GET /api/news` - List news (dengan pagination, search, filter)
-- `GET /api/news/:slug` - Get single news
-- `GET /api/news/search?q=` - Search news
+**Public:**
+- `GET /api/news` - List news
+- `GET /api/news/:slug` - Get news by slug
+- `GET /api/news/featured` - Get featured news
 - `GET /api/categories` - List categories
 
-### Admin (Protected)
+**Admin (Protected):**
 - `POST /api/admin/login` - Admin login
+- `GET /api/admin/news` - List all news (all statuses)
 - `POST /api/admin/news` - Create news
 - `PUT /api/admin/news/:id` - Update news
 - `DELETE /api/admin/news/:id` - Delete news
-- `POST /api/admin/upload` - Upload image
+- `POST /api/admin/news/:id/approve` - Approve news
+- `POST /api/admin/news/:id/reject` - Reject news
 
-## 📝 Environment Variables
+**Publisher (Protected):**
+- `POST /api/publisher/login` - Publisher login
+- `POST /api/publisher/news` - Create news (auto pending)
+- `PUT /api/publisher/news/:id` - Update news
 
-### Backend (.env)
-```
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=password
-DB_NAME=xinxun_news
-JWT_SECRET=your-secret-key
-PORT=8080
-CORS_ORIGIN=http://localhost:3000
-```
+## 🔐 Features
 
-### Frontend (.env.local)
-```
-NEXT_PUBLIC_API_URL=http://localhost:8080/api
-NEXT_PUBLIC_SITE_URL=https://news.xinxun.us
-```
-
-## 🐳 Docker
-
-Docker Compose setup sudah termasuk:
-- MySQL 8.0
-- Go Backend
-- Next.js Frontend
-- Volume persistence untuk database
-- Network configuration
-
-## 📚 Documentation
-
-- [Backend README](./backend/README.md)
-- [Frontend README](./frontend/README.md)
-
-## 🔒 Security Notes
-
-1. Ganti `JWT_SECRET` dengan secret key yang kuat di production
-2. Ganti password admin default setelah deployment
-3. Setup HTTPS untuk production
-4. Konfigurasi CORS dengan benar
-5. Gunakan environment variables untuk sensitive data
+- ✅ Admin panel dengan CRUD news
+- ✅ Publisher dashboard untuk submit artikel
+- ✅ News approval workflow
+- ✅ Category management dengan admin-only categories
+- ✅ Image upload ke AWS S3
+- ✅ WYSIWYG editor untuk konten
+- ✅ SEO optimized
+- ✅ Responsive design
 
 ## 📄 License
 
-Copyright © 2024 Xinxun. All rights reserved.
-
+Copyright © 2025 Xinxun, Ltd. All rights reserved.

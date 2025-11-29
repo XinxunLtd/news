@@ -98,7 +98,28 @@ AWS_S3_BUCKET=your_bucket_name
 
 **PENTING:** Ganti semua nilai dengan data yang sesuai!
 
-### 3.2 Frontend Environment
+### 3.2 Docker Compose Environment
+
+Buat file `.env` di root project untuk Docker Compose:
+
+```bash
+cd /opt/news
+sudo nano .env
+```
+
+Isi dengan:
+
+```env
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_REGION=ap-southeast-1
+AWS_S3_BUCKET=your_bucket_name
+MYSQL_ROOT_PASSWORD=your_secure_password_here
+```
+
+Docker Compose akan otomatis membaca file `.env` ini.
+
+### 3.3 Frontend Environment
 
 ```bash
 cd /opt/news/frontend
@@ -112,14 +133,6 @@ NEXT_PUBLIC_API_URL=https://api-news.xinxun.us/api
 NEXT_PUBLIC_SITE_URL=https://news.xinxun.us
 ```
 
-### 3.3 Docker Compose Environment
-
-```bash
-cd /opt/news
-sudo nano docker-compose.yml
-```
-
-Update environment variables di `docker-compose.yml` sesuai dengan `.env` files.
 
 ## 🔒 Step 4: Setup SSL dengan Let's Encrypt (Certbot)
 
