@@ -66,14 +66,16 @@ Server akan berjalan di `http://localhost:8080`
 
 ### Public Endpoints
 
-- `GET /api/news` - List semua news (dengan pagination, search, filter)
-- `GET /api/news/:slug` - Get single news by slug
-- `GET /api/news/search?q=query` - Search news
-- `GET /api/categories` - List categories
+- `GET /v1/news` - List semua news (dengan pagination, search, filter)
+- `GET /v1/:slug` - Get single news by slug
+- `GET /v1/news/search?q=query` - Search news
+- `GET /v1/news/featured` - Get featured news
+- `GET /v1/categories` - List categories
+- `GET /v1/xinxun/newest` - Get 3 newest published news
 
 ### Admin Endpoints (Protected)
 
-- `POST /api/admin/login` - Admin login
+- `POST /v1/admin/login` - Admin login
   ```json
   {
     "username": "admin",
@@ -81,10 +83,16 @@ Server akan berjalan di `http://localhost:8080`
   }
   ```
 
-- `POST /api/admin/news` - Create news (requires JWT token)
-- `PUT /api/admin/news/:id` - Update news (requires JWT token)
-- `DELETE /api/admin/news/:id` - Delete news (requires JWT token)
-- `POST /api/admin/upload` - Upload image (requires JWT token)
+- `POST /v1/admin/news` - Create news (requires JWT token)
+- `PUT /v1/admin/news/:id` - Update news (requires JWT token)
+- `DELETE /v1/admin/news/:id` - Delete news (requires JWT token)
+- `POST /v1/admin/upload` - Upload image (requires JWT token)
+
+### Publisher Endpoints (Protected)
+
+- `POST /v1/publisher/login` - Publisher login
+- `POST /v1/publisher/news` - Create news (auto pending, requires JWT token)
+- `PUT /v1/publisher/news/:id` - Update news (requires JWT token)
 
 ## Authentication
 

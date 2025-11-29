@@ -88,7 +88,7 @@ docker-compose up -d
 
 4. **Access application**
 - Frontend: http://localhost:3000
-- Backend API: http://localhost:8080/api
+- Backend API: http://localhost:8080/v1
 - Health Check: http://localhost:8080/health
 
 ## 📝 Default Credentials
@@ -117,29 +117,30 @@ Lihat [how-to-run.md](./how-to-run.md) untuk panduan lengkap deployment di VPS.
 
 ### Production URLs
 - Frontend: https://news.xinxun.us
-- Backend API: https://api-news.xinxun.us/api
+- Backend API: https://api-news.xinxun.us/v1
 
 ### API Endpoints
 
 **Public:**
-- `GET /api/news` - List news
-- `GET /api/news/:slug` - Get news by slug
-- `GET /api/news/featured` - Get featured news
-- `GET /api/categories` - List categories
+- `GET /v1/news` - List news
+- `GET /v1/:slug` - Get news by slug
+- `GET /v1/news/featured` - Get featured news
+- `GET /v1/categories` - List categories
+- `GET /v1/xinxun/newest` - Get 3 newest published news
 
 **Admin (Protected):**
-- `POST /api/admin/login` - Admin login
-- `GET /api/admin/news` - List all news (all statuses)
-- `POST /api/admin/news` - Create news
-- `PUT /api/admin/news/:id` - Update news
-- `DELETE /api/admin/news/:id` - Delete news
-- `POST /api/admin/news/:id/approve` - Approve news
-- `POST /api/admin/news/:id/reject` - Reject news
+- `POST /v1/admin/login` - Admin login
+- `GET /v1/admin/news` - List all news (all statuses)
+- `POST /v1/admin/news` - Create news
+- `PUT /v1/admin/news/:id` - Update news
+- `DELETE /v1/admin/news/:id` - Delete news
+- `POST /v1/admin/news/:id/approve` - Approve news
+- `POST /v1/admin/news/:id/reject` - Reject news
 
 **Publisher (Protected):**
-- `POST /api/publisher/login` - Publisher login
-- `POST /api/publisher/news` - Create news (auto pending)
-- `PUT /api/publisher/news/:id` - Update news
+- `POST /v1/publisher/login` - Publisher login
+- `POST /v1/publisher/news` - Create news (auto pending)
+- `PUT /v1/publisher/news/:id` - Update news
 
 ## 🔐 Features
 

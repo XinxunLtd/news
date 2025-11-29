@@ -33,7 +33,7 @@ cp .env.example .env.local
 
 Edit `.env.local`:
 ```
-NEXT_PUBLIC_API_URL=http://localhost:8080/api
+NEXT_PUBLIC_API_URL=http://localhost:8080/v1
 NEXT_PUBLIC_SITE_URL=https://news.xinxun.us
 ```
 
