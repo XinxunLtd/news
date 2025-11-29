@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { newsApi, publisherApi } from '@/lib/api'
 import type { News } from '@/types'
 import { FiEdit, FiTrash2, FiTrendingUp, FiFileText, FiClock, FiEye, FiX, FiEye as FiPreview } from 'react-icons/fi'
-import { useState } from 'react'
 import NewsPreviewModal from '@/components/NewsPreviewModal'
 import toast from 'react-hot-toast'
 
