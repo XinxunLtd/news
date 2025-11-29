@@ -129,7 +129,7 @@ sudo nano .env.local
 Isi dengan:
 
 ```env
-NEXT_PUBLIC_API_URL=https://api-news.xinxun.us/api
+NEXT_PUBLIC_API_URL=https://api-news.xinxun.us/v1
 NEXT_PUBLIC_SITE_URL=https://news.xinxun.us
 ```
 

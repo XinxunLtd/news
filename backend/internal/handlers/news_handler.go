@@ -106,8 +106,8 @@ func (h *NewsHandler) GetNewestNews(c *gin.Context) {
 		Title      string `json:"title"`
 		Excerpt    string `json:"excerpt"`
 		Thumbnail  string `json:"thumbnail"`
-		Category   string `json:"nama kategori"`
-		TotalViews int    `json:"total views"`
+		Category   string `json:"categories"`
+		TotalViews int    `json:"views"`
 		Href       string `json:"href"`
 	}
 
@@ -126,7 +126,7 @@ func (h *NewsHandler) GetNewestNews(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "successfully",
+		"message": "Successfully",
 		"data":    result,
 	})
 }
