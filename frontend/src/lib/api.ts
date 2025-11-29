@@ -167,6 +167,32 @@ export const adminCategoryApi = {
   },
 }
 
+export const adminTagApi = {
+  getAll: async (): Promise<{ data: Tag[] }> => {
+    const apiInstance = getApi()
+    const response = await apiInstance.get('/admin/tags')
+    return response.data
+  },
+
+  create: async (data: { name: string }) => {
+    const apiInstance = getApi()
+    const response = await apiInstance.post('/admin/tags', data)
+    return response.data
+  },
+
+  update: async (id: number, data: { name: string }) => {
+    const apiInstance = getApi()
+    const response = await apiInstance.put(`/admin/tags/${id}`, data)
+    return response.data
+  },
+
+  delete: async (id: number) => {
+    const apiInstance = getApi()
+    const response = await apiInstance.delete(`/admin/tags/${id}`)
+    return response.data
+  },
+}
+
 export const adminApi = {
   login: async (username: string, password: string) => {
     const apiInstance = getApi()
@@ -219,6 +245,18 @@ export const adminApi = {
   getPendingNews: async () => {
     const apiInstance = getApi()
     const response = await apiInstance.get('/admin/news/pending')
+    return response.data
+  },
+
+  getPendingRevisions: async () => {
+    const apiInstance = getApi()
+    const response = await apiInstance.get('/admin/news/pending/revisions')
+    return response.data
+  },
+
+  getPendingCounts: async () => {
+    const apiInstance = getApi()
+    const response = await apiInstance.get('/admin/news/pending/counts')
     return response.data
   },
 

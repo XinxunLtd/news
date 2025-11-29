@@ -14,7 +14,7 @@ export default function PublisherLayout({
     <SidebarProvider>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex overflow-x-hidden">
         <PublisherSidebar />
-        <div className="flex-1 flex flex-col md:ml-64 overflow-x-hidden">
+        <div className="flex-1 flex flex-col overflow-x-hidden">
           <PublisherHeader />
           <main className="flex-1 overflow-auto overflow-x-hidden pt-4">
             {children}

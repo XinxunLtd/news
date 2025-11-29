@@ -57,8 +57,8 @@ export default function PendingNewsPage() {
           >
             ← Kembali ke Dashboard
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Artikel Pending</h1>
-          <p className="text-gray-600 mt-2">Review dan approve/reject artikel dari publisher</p>
+          <h1 className="text-3xl font-bold text-gray-900">Pending Artikel Baru</h1>
+          <p className="text-gray-600 mt-2">Review dan approve/reject artikel baru dari publisher</p>
         </div>
 
         <div className="bg-white rounded-lg shadow overflow-hidden">

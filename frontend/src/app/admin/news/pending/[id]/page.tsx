@@ -53,15 +53,32 @@ export default function PendingNewsDetailPage() {
     }
   }
 
-  const handleApprove = async (amount: number) => {
+  const handleApprove = () => {
+    if (!news) return
+    
+    // If this is a revision, approve without reward
+    if (news.revision_of) {
+      handleConfirmApprove(0)
+      return
+    }
+    
+    // For new articles, show reward modal
+    setShowRewardModal(true)
+  }
+
+  const handleConfirmApprove = async (amount: number) => {
     if (!news) return
 
     setProcessing(true)
     try {
       await adminApi.approveNews(news.id, amount)
-      toast.success('Artikel berhasil di-approve!')
+      toast.success(news.revision_of ? 'Edit artikel berhasil disetujui!' : 'Artikel berhasil di-approve!')
       setShowRewardModal(false)
-      router.push('/admin/news/pending')
+      if (news.revision_of) {
+        router.push('/admin/news/pending/revisions')
+      } else {
+        router.push('/admin/news/pending')
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Gagal approve artikel')
     } finally {
@@ -78,7 +95,11 @@ export default function PendingNewsDetailPage() {
     try {
       await adminApi.rejectNews(news.id)
       toast.success('Artikel ditolak')
-      router.push('/admin/news/pending')
+      if (news.revision_of) {
+        router.push('/admin/news/pending/revisions')
+      } else {
+        router.push('/admin/news/pending')
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Gagal reject artikel')
     } finally {
@@ -105,11 +126,11 @@ export default function PendingNewsDetailPage() {
           {/* Header */}
           <div className="mb-8">
             <Link
-              href="/admin/news/pending"
+              href={news.revision_of ? "/admin/news/pending/revisions" : "/admin/news/pending"}
               className="text-[#fe7d17] hover:text-[#e66d0f] mb-4 inline-flex items-center space-x-2"
             >
               <FiArrowLeft />
-              <span>Kembali ke Pending News</span>
+              <span>Kembali ke {news.revision_of ? "Pending Edit" : "Pending News"}</span>
             </Link>
             <h1 className="text-3xl font-bold text-gray-900">Review Artikel</h1>
             <p className="text-gray-600 mt-2">Review detail artikel sebelum approve/reject</p>
@@ -205,7 +226,7 @@ export default function PendingNewsDetailPage() {
                   <span>Reject</span>
                 </button>
                 <button
-                  onClick={() => setShowRewardModal(true)}
+                  onClick={handleApprove}
                   disabled={processing}
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
                 >
@@ -218,13 +239,15 @@ export default function PendingNewsDetailPage() {
         </div>
       </div>
 
-      {/* Reward Modal */}
-      <RewardModal
-        isOpen={showRewardModal}
-        onClose={() => setShowRewardModal(false)}
-        onConfirm={handleApprove}
-        newsTitle={news.title}
-      />
+      {/* Reward Modal - Only show for new articles, not revisions */}
+      {!news.revision_of && (
+        <RewardModal
+          isOpen={showRewardModal}
+          onClose={() => setShowRewardModal(false)}
+          onConfirm={handleConfirmApprove}
+          loading={processing}
+        />
+      )}
 
       {/* Preview Modal */}
       <NewsPreviewModal

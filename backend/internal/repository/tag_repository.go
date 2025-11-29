@@ -33,3 +33,11 @@ func (r *TagRepository) Create(tag *models.Tag) error {
 	return database.DB.Create(tag).Error
 }
 
+func (r *TagRepository) Update(tag *models.Tag) error {
+	return database.DB.Save(tag).Error
+}
+
+func (r *TagRepository) Delete(id uint) error {
+	return database.DB.Delete(&models.Tag{}, id).Error
+}
+

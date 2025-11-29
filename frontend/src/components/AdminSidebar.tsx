@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { useSidebar } from '@/contexts/SidebarContext'
+import { adminApi } from '@/lib/api'
 import {
   FiHome,
   FiFileText,
@@ -14,17 +15,39 @@ import {
   FiClock,
   FiLogOut,
   FiUser,
+  FiEdit,
 } from 'react-icons/fi'
 
 export default function AdminSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { isOpen, close } = useSidebar()
+  const [pendingCounts, setPendingCounts] = useState({ pending_new: 0, pending_revision: 0 })
 
   // Close sidebar on mobile when route changes
   useEffect(() => {
     close()
   }, [pathname, close])
+
+  // Load pending counts
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token')
+    if (token) {
+      loadPendingCounts()
+      // Refresh every 30 seconds
+      const interval = setInterval(loadPendingCounts, 30000)
+      return () => clearInterval(interval)
+    }
+  }, [])
+
+  const loadPendingCounts = async () => {
+    try {
+      const response = await adminApi.getPendingCounts()
+      setPendingCounts(response.data)
+    } catch (error) {
+      // Silent fail
+    }
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('admin_token')
@@ -36,8 +59,10 @@ export default function AdminSidebar() {
   const menuItems = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: FiHome },
     { href: '/admin/news/new', label: 'Tambah Artikel', icon: FiFileText },
-    { href: '/admin/news/pending', label: 'Pending News', icon: FiClock },
+    { href: '/admin/news/pending', label: 'Pending Artikel Baru', icon: FiClock, count: pendingCounts.pending_new },
+    { href: '/admin/news/pending/revisions', label: 'Pending Edit Artikel', icon: FiEdit, count: pendingCounts.pending_revision },
     { href: '/admin/categories', label: 'Kelola Kategori', icon: FiTag },
+    { href: '/admin/tags', label: 'Kelola Tags', icon: FiTag },
     { href: '/admin/publishers', label: 'Kelola Publisher', icon: FiUsers },
     { href: '/admin/profile', label: 'Profil Saya', icon: FiUser },
   ]
@@ -49,12 +74,13 @@ export default function AdminSidebar() {
         <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={close}
+          style={{ zIndex: 40 }}
         />
       )}
 
       {/* Sidebar */}
       <div
-        className={`fixed lg:static inset-y-0 left-0 z-40 w-64 bg-gradient-to-b from-gray-900 to-gray-800 text-white min-h-screen flex flex-col transform transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-gray-900 to-gray-800 text-white min-h-screen flex flex-col transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
@@ -68,18 +94,28 @@ export default function AdminSidebar() {
           {menuItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
+            const count = item.count || 0
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                  className={`flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
                     isActive
                       ? 'bg-[#fe7d17] text-white'
                       : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
+                  <div className="flex items-center space-x-3">
+                    <Icon className="w-5 h-5" />
+                    <span>{item.label}</span>
+                  </div>
+                  {count > 0 && (
+                    <span className={`px-2 py-1 text-xs font-bold rounded-full ${
+                      isActive ? 'bg-white text-[#fe7d17]' : 'bg-[#fe7d17] text-white'
+                    }`}>
+                      {count}
+                    </span>
+                  )}
                 </Link>
               </li>
             )

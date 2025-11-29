@@ -119,7 +119,20 @@ func SetupRoutes() *gin.Engine {
 			adminNews.POST("/:id/approve", adminHandler.ApproveNews)
 			adminNews.POST("/:id/reject", adminHandler.RejectNews)
 			adminNews.GET("/pending", adminHandler.GetPendingNews)
+			adminNews.GET("/pending/revisions", adminHandler.GetPendingRevisions)
+			adminNews.GET("/pending/counts", adminHandler.GetPendingCounts)
 			adminNews.GET("/statistics", adminHandler.GetStatistics)
+		}
+
+		// Tag management (admin only)
+		tagHandler := handlers.NewTagHandler()
+		adminTags := admin.Group("/tags")
+		adminTags.Use(middleware.AuthMiddleware())
+		{
+			adminTags.GET("", tagHandler.GetTags)
+			adminTags.POST("", tagHandler.CreateTag)
+			adminTags.PUT("/:id", tagHandler.UpdateTag)
+			adminTags.DELETE("/:id", tagHandler.DeleteTag)
 		}
 	}
 

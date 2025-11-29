@@ -11,6 +11,7 @@ import (
 	"xinxun-news/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gosimple/slug"
 )
 
 type AdminHandler struct {
@@ -70,6 +71,7 @@ func (h *AdminHandler) ApproveNews(c *gin.Context) {
 	}
 
 	// If this is a revision, update the original news instead
+	// Revisions don't get rewards (only new articles do)
 	if news.RevisionOf != nil {
 		originalNews, err := h.newsRepo.FindByID(*news.RevisionOf)
 		if err != nil {
@@ -77,15 +79,28 @@ func (h *AdminHandler) ApproveNews(c *gin.Context) {
 			return
 		}
 
-		// Update original with revision data
+		// Generate new slug if title changed, otherwise keep original slug
+		newSlug := originalNews.Slug
+		if news.Title != originalNews.Title {
+			// Generate slug from new title
+			newSlug = slug.Make(news.Title)
+			// Ensure unique slug
+			existing, _ := h.newsRepo.FindBySlug(newSlug)
+			if existing != nil && existing.ID != originalNews.ID {
+				newSlug = newSlug + "-" + strconv.FormatInt(time.Now().Unix(), 10)
+			}
+		}
+
+		// Update original with revision data (no reward for edits)
 		originalNews.Title = news.Title
-		originalNews.Slug = news.Slug
+		originalNews.Slug = newSlug
 		originalNews.Content = news.Content
 		originalNews.Excerpt = news.Excerpt
 		originalNews.Thumbnail = news.Thumbnail
 		originalNews.CategoryID = news.CategoryID
 		originalNews.Tags = news.Tags
-		originalNews.RewardAmount = req.RewardAmount
+		// No reward for revisions
+		originalNews.RewardAmount = 0
 		now := time.Now()
 		originalNews.PublishedAt = &now
 		originalNews.Status = models.StatusPublished
@@ -108,26 +123,8 @@ func (h *AdminHandler) ApproveNews(c *gin.Context) {
 			return
 		}
 
-		// Send reward
-		if req.RewardAmount > 0 && !updatedOriginal.IsRewarded && author.XinxunID != nil {
-			rewardResp, err := services.SendReward(*author.XinxunID, req.RewardAmount)
-			if err != nil {
-				c.JSON(http.StatusOK, gin.H{
-					"message": "News approved but reward failed",
-					"error":   err.Error(),
-					"data":    updatedOriginal,
-				})
-				return
-			}
-
-			if rewardResp.Success {
-				updatedOriginal.IsRewarded = true
-				h.newsRepo.Update(updatedOriginal)
-			}
-		}
-
 		c.JSON(http.StatusOK, gin.H{
-			"message": "Revision approved and original news updated successfully",
+			"message": "Revision approved and original news updated successfully (no reward for edits)",
 			"data":    updatedOriginal,
 		})
 		return
@@ -197,10 +194,13 @@ func (h *AdminHandler) RejectNews(c *gin.Context) {
 	})
 }
 
-// GetPendingNews gets all pending news for admin review
+// GetPendingNews gets all pending news for admin review (new articles only, not revisions)
 func (h *AdminHandler) GetPendingNews(c *gin.Context) {
-	pending := models.StatusPending
-	news, total, err := h.newsRepo.FindAll(100, 0, "", "", &pending)
+	var news []models.News
+	err := database.DB.Preload("Category").Preload("Author").Preload("Tags").
+		Where("status = ? AND revision_of IS NULL", models.StatusPending).
+		Order("created_at DESC").
+		Find(&news).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -209,7 +209,45 @@ func (h *AdminHandler) GetPendingNews(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"data": news,
 		"meta": gin.H{
-			"total": total,
+			"total": len(news),
+		},
+	})
+}
+
+// GetPendingRevisions gets all pending revisions (edits) for admin review
+func (h *AdminHandler) GetPendingRevisions(c *gin.Context) {
+	var news []models.News
+	err := database.DB.Preload("Category").Preload("Author").Preload("Tags").
+		Where("status = ? AND revision_of IS NOT NULL", models.StatusPending).
+		Order("created_at DESC").
+		Find(&news).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": news,
+		"meta": gin.H{
+			"total": len(news),
+		},
+	})
+}
+
+// GetPendingCounts gets counts of pending new articles and pending revisions
+func (h *AdminHandler) GetPendingCounts(c *gin.Context) {
+	var newCount, revisionCount int64
+	database.DB.Model(&models.News{}).
+		Where("status = ? AND revision_of IS NULL", models.StatusPending).
+		Count(&newCount)
+	database.DB.Model(&models.News{}).
+		Where("status = ? AND revision_of IS NOT NULL", models.StatusPending).
+		Count(&revisionCount)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"pending_new":      newCount,
+			"pending_revision": revisionCount,
 		},
 	})
 }
