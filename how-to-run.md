@@ -178,7 +178,7 @@ server {
 # Backend API
 server {
     listen 80;
-    server_name api-news.xinxun.us;
+    server_name api.news.xinxun.us;
 
     location / {
         proxy_pass http://localhost:8080;
