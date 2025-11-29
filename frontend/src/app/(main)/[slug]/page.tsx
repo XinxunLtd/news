@@ -135,7 +135,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
               <ShareButton
                 title={news.title}
                 text={news.excerpt}
-                url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://news.xinxun.us'}/news/${news.slug}`}
+                url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://news.xinxun.us'}/${news.slug}`}
               />
             </div>
 

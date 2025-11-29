@@ -12,7 +12,7 @@ interface NewsCardProps {
 export default function NewsCard({ news, featured = false }: NewsCardProps) {
   if (featured) {
     return (
-      <Link href={`/news/${news.slug}`} className="block">
+      <Link href={`/${news.slug}`} className="block">
         <article className="card group">
           <div className="relative h-64 md:h-96 overflow-hidden">
             {news.thumbnail ? (

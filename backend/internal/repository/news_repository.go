@@ -55,6 +55,17 @@ func (r *NewsRepository) FindTopViews(limit int) ([]models.News, error) {
 	return news, err
 }
 
+// FindNewest gets newest published news ordered by created_at DESC
+func (r *NewsRepository) FindNewest(limit int) ([]models.News, error) {
+	var news []models.News
+	err := database.DB.Preload("Category").
+		Where("status = ?", models.StatusPublished).
+		Order("created_at DESC").
+		Limit(limit).
+		Find(&news).Error
+	return news, err
+}
+
 func (r *NewsRepository) FindBySlug(slug string) (*models.News, error) {
 	var news models.News
 	err := database.DB.Preload("Category").Preload("Author").Preload("Tags").

@@ -145,7 +145,7 @@ export default function PublisherDashboard() {
                 <div className="flex items-center space-x-4 flex-1">
                   <span className="text-2xl font-bold text-[#fe7d17] w-8">{index + 1}</span>
                   <div className="flex-1">
-                    <Link href={`/news/${item.slug}`} className="text-sm font-medium text-gray-900 hover:text-[#fe7d17]">
+                    <Link href={`/${item.slug}`} className="text-sm font-medium text-gray-900 hover:text-[#fe7d17]">
                       {item.title}
                     </Link>
                     <p className="text-xs text-gray-500 mt-1">

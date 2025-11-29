@@ -8,12 +8,12 @@ const getApiUrl = (): string => {
   // Server-side rendering (no window object)
   if (typeof window === 'undefined') {
     // In Docker, use service name. For local dev, use localhost
-    return process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
+    return process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/v1'
   }
   // Client-side: try NEXT_PUBLIC_API_URL first, then fallback to 127.0.0.1 if localhost doesn't work
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080/api'
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080/v1'
   // Replace localhost with 127.0.0.1 for better Windows compatibility
-  return apiUrl.replace('localhost', '127.0.0.1')
+  return apiUrl.replace('localhost', '127.0.0.1').replace('/api', '/v1')
 }
 
 // Cache for axios instances
@@ -104,7 +104,7 @@ export const newsApi = {
 
   getBySlug: async (slug: string): Promise<SingleNewsResponse> => {
     const apiInstance = getApi()
-    const response = await apiInstance.get(`/news/${slug}`)
+    const response = await apiInstance.get(`/${slug}`) // Changed from /news/:slug to /:slug
     return response.data
   },
 

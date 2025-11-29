@@ -51,26 +51,33 @@ func SetupRoutes() *gin.Engine {
 		c.JSON(200, gin.H{"status": "ok", "message": "Backend is running"})
 	})
 
-	// Public routes
-	api := r.Group("/api")
+	// Public routes - Changed from /api to /v1
+	v1 := r.Group("/v1")
 	{
 		newsHandler := handlers.NewNewsHandler()
 		categoryHandler := handlers.NewCategoryHandler()
 		tagHandler := handlers.NewTagHandler()
 
-		api.GET("/news", newsHandler.GetNews)
-		api.GET("/news/featured", newsHandler.GetFeaturedNews)
-		api.GET("/news/:slug", newsHandler.GetNewsBySlug)
-		api.GET("/news/search", newsHandler.SearchNews)
-		api.GET("/categories", categoryHandler.GetCategories)
-		api.GET("/tags", tagHandler.GetTags)
+		// News routes
+		v1.GET("/news", newsHandler.GetNews)
+		v1.GET("/news/featured", newsHandler.GetFeaturedNews)
+		v1.GET("/news/search", newsHandler.SearchNews)
+		v1.GET("/categories", categoryHandler.GetCategories)
+		v1.GET("/tags", tagHandler.GetTags)
+
+		// Xinxun integration endpoint
+		v1.GET("/xinxun/newest", newsHandler.GetNewestNews)
+
+		// News detail by slug - Must be last to avoid route conflicts
+		// Changed from /news/:slug to /:slug
+		v1.GET("/:slug", newsHandler.GetNewsBySlug)
 	}
 
-	// Publisher routes (public)
-	api.POST("/publisher/login", handlers.NewPublisherHandler().Login)
+	// Publisher routes (public) - Changed from /api to /v1
+	v1.POST("/publisher/login", handlers.NewPublisherHandler().Login)
 
-	// Admin routes (protected)
-	admin := r.Group("/api/admin")
+	// Admin routes (protected) - Changed from /api/admin to /v1/admin
+	admin := v1.Group("/admin")
 	{
 		authHandler := handlers.NewAuthHandler()
 		newsHandler := handlers.NewNewsHandler()
@@ -136,8 +143,8 @@ func SetupRoutes() *gin.Engine {
 		}
 	}
 
-	// Publisher routes (protected)
-	publisher := r.Group("/api/publisher")
+	// Publisher routes (protected) - Changed from /api/publisher to /v1/publisher
+	publisher := v1.Group("/publisher")
 	publisher.Use(middleware.AuthMiddleware())
 	{
 		newsHandler := handlers.NewNewsHandler()

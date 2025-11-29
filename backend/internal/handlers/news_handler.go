@@ -89,8 +89,65 @@ func (h *NewsHandler) GetFeaturedNews(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": news})
 }
 
+// GetNewestNews gets 3 newest published news for xinxun.us integration
+func (h *NewsHandler) GetNewestNews(c *gin.Context) {
+	news, err := h.newsRepo.FindNewest(3)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to fetch news",
+			"data":    nil,
+		})
+		return
+	}
+
+	// Format response according to requirements
+	type NewsItem struct {
+		Title      string `json:"title"`
+		Excerpt    string `json:"excerpt"`
+		Thumbnail  string `json:"thumbnail"`
+		Category   string `json:"nama kategori"`
+		TotalViews int    `json:"total views"`
+		Href       string `json:"href"`
+	}
+
+	var result []NewsItem
+	baseURL := "https://news.xinxun.us"
+	for _, item := range news {
+		result = append(result, NewsItem{
+			Title:      item.Title,
+			Excerpt:    item.Excerpt,
+			Thumbnail:  item.Thumbnail,
+			Category:   item.Category.Name,
+			TotalViews: item.Views,
+			Href:       baseURL + "/" + item.Slug,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "successfully",
+		"data":    result,
+	})
+}
+
 func (h *NewsHandler) GetNewsBySlug(c *gin.Context) {
 	slug := c.Param("slug")
+
+	// Exclude reserved paths that should not be treated as news slugs
+	reservedPaths := map[string]bool{
+		"news":       true,
+		"categories": true,
+		"tags":       true,
+		"xinxun":     true,
+		"admin":      true,
+		"publisher":  true,
+		"health":     true,
+	}
+	if reservedPaths[slug] {
+		c.JSON(http.StatusNotFound, gin.H{"error": "News not found"})
+		return
+	}
 
 	news, err := h.newsRepo.FindBySlug(slug)
 	if err != nil {

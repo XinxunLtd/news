@@ -23,11 +23,17 @@ export default function AdminSidebar() {
   const router = useRouter()
   const { isOpen, close } = useSidebar()
   const [pendingCounts, setPendingCounts] = useState({ pending_new: 0, pending_revision: 0 })
+  const [prevPathname, setPrevPathname] = useState(pathname)
 
-  // Close sidebar on mobile when route changes
+  // Close sidebar on mobile when route changes (but not on initial mount)
   useEffect(() => {
-    close()
-  }, [pathname, close])
+    // Only close if pathname actually changed and sidebar is open
+    if (prevPathname !== pathname && isOpen && typeof window !== 'undefined' && window.innerWidth < 1024) {
+      close()
+    }
+    setPrevPathname(pathname)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname])
 
   // Load pending counts
   useEffect(() => {
@@ -73,7 +79,16 @@ export default function AdminSidebar() {
       {isOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-[60]"
-          onClick={close}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            close()
+          }}
+          onTouchStart={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            close()
+          }}
           style={{ zIndex: 60 }}
         />
       )}
@@ -85,6 +100,8 @@ export default function AdminSidebar() {
         }`}
         style={{ zIndex: 70 }}
         aria-label="Sidebar"
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
       >
       <div className="p-6 border-b border-gray-700">
         <h2 className="text-xl font-bold text-[#fe7d17]">Admin Panel</h2>
@@ -101,6 +118,12 @@ export default function AdminSidebar() {
               <li key={item.href}>
                 <Link
                   href={item.href}
+                  onClick={() => {
+                    // Close sidebar on mobile when link is clicked
+                    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                      close()
+                    }
+                  }}
                   className={`flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
                     isActive
                       ? 'bg-[#fe7d17] text-white'

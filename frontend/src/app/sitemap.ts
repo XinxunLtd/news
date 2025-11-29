@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const news = newsResponse.data
 
     const newsEntries = news.map((item) => ({
-      url: `${baseUrl}/news/${item.slug}`,
+      url: `${baseUrl}/${item.slug}`,
       lastModified: new Date(item.updated_at),
       changeFrequency: 'weekly' as const,
       priority: 0.8,

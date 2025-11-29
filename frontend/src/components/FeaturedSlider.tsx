@@ -59,7 +59,7 @@ export default function FeaturedSlider() {
         {news.map((item, index) => (
           <Link
             key={item.id}
-            href={`/news/${item.slug}`}
+            href={`/${item.slug}`}
             className={`absolute inset-0 transition-opacity duration-500 ${
               index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
