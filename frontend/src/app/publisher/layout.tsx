@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import PublisherSidebar from '@/components/PublisherSidebar'
 import PublisherHeader from '@/components/PublisherHeader'
 import PublisherFooter from '@/components/PublisherFooter'
@@ -10,6 +11,13 @@ export default function PublisherLayout({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname()
+  const isLoginPage = pathname === '/publisher/login'
+
+  if (isLoginPage) {
+    return <>{children}</>
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex overflow-x-hidden">

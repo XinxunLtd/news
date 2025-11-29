@@ -130,7 +130,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
             </div>
 
             {/* Share Buttons */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 mb-4">
               <span className="text-sm text-gray-600">Bagikan:</span>
               <ShareButton
                 title={news.title}
@@ -138,6 +138,26 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
                 url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://news.xinxun.us'}/news/${news.slug}`}
               />
             </div>
+
+            {/* Referral Button - Only for publisher articles */}
+            {news.author.user_type === 'publisher' && news.author.reff_code && (
+              <div className="mb-6 p-4 bg-gradient-to-r from-[#fe7d17] to-[#e66d0f] rounded-lg shadow-lg">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="text-white">
+                    <p className="font-semibold text-lg mb-1">Bergabung Bersama Saya di XinXun!</p>
+                    <p className="text-sm opacity-90">Mulai investasi dan dapatkan keuntungan bersama platform terpercaya</p>
+                  </div>
+                  <a
+                    href={`https://xinxun.us/register?reff=${news.author.reff_code}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-3 bg-white text-[#fe7d17] font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-md whitespace-nowrap"
+                  >
+                    Daftar Sekarang →
+                  </a>
+                </div>
+              </div>
+            )}
           </header>
 
           {/* Featured Image */}
