@@ -9,14 +9,19 @@ export default function AdminHeader() {
   const { isOpen, toggle } = useSidebar()
 
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm">
+    <header className="bg-white border-b border-gray-200 shadow-sm relative z-40">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {/* Mobile menu button - only visible on mobile */}
             <button
-              onClick={toggle}
-              className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+              onClick={(e) => {
+                e.stopPropagation()
+                toggle()
+              }}
+              className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg relative z-[80]"
+              aria-label="Toggle menu"
+              type="button"
             >
               {isOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
             </button>

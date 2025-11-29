@@ -72,16 +72,19 @@ export default function AdminSidebar() {
       {/* Overlay for mobile */}
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-[45]"
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-[60]"
           onClick={close}
+          style={{ zIndex: 60 }}
         />
       )}
 
       {/* Sidebar */}
-      <div
-        className={`fixed lg:static inset-y-0 left-0 z-[50] w-64 bg-gradient-to-b from-gray-900 to-gray-800 text-white min-h-screen flex flex-col transform transition-transform duration-300 ease-in-out ${
+      <aside
+        className={`fixed lg:static inset-y-0 left-0 w-64 bg-gradient-to-b from-gray-900 to-gray-800 text-white min-h-screen flex flex-col transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
+        style={{ zIndex: 70 }}
+        aria-label="Sidebar"
       >
       <div className="p-6 border-b border-gray-700">
         <h2 className="text-xl font-bold text-[#fe7d17]">Admin Panel</h2>
@@ -131,7 +134,7 @@ export default function AdminSidebar() {
           <span>Logout</span>
         </button>
       </div>
-      </div>
+      </aside>
     </>
   )
 }
