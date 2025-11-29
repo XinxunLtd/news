@@ -6,7 +6,6 @@ import { adminCategoryApi } from '@/lib/api'
 import type { Category } from '@/types'
 import { FiEdit, FiTrash2, FiPlus, FiLock } from 'react-icons/fi'
 import toast from 'react-hot-toast'
-import AdminSidebar from '@/components/AdminSidebar'
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([])
@@ -88,10 +87,7 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
-      <AdminSidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto px-6 py-8">
+    <div className="container mx-auto px-6 py-8">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Kelola Kategori</h1>
@@ -215,8 +211,6 @@ export default function CategoriesPage() {
             </div>
           </div>
         )}
-        </div>
-      </div>
     </div>
   )
 }

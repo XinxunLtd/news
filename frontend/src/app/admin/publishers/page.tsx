@@ -7,7 +7,6 @@ import { adminApi } from '@/lib/api'
 import toast from 'react-hot-toast'
 import type { User } from '@/types'
 import { FiEdit, FiTrash2, FiEye } from 'react-icons/fi'
-import AdminSidebar from '@/components/AdminSidebar'
 
 export default function PublishersPage() {
   const [publishers, setPublishers] = useState<User[]>([])
@@ -61,10 +60,7 @@ export default function PublishersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <AdminSidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto px-6 py-8">
+    <div className="container mx-auto px-6 py-8">
           <div className="mb-8 flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Kelola Publisher</h1>
@@ -155,8 +151,6 @@ export default function PublishersPage() {
               </div>
             )}
           </div>
-        </div>
-      </div>
     </div>
   )
 }

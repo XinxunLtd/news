@@ -196,10 +196,7 @@ export default function NewPublisherNewsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <PublisherSidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto px-6 py-8">
+    <div className="container mx-auto px-6 py-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Tambah Artikel Baru</h1>
 
           <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-8 space-y-6">
@@ -380,8 +377,6 @@ export default function NewPublisherNewsPage() {
               }}
             />
           )}
-        </div>
-      </div>
     </div>
   )
 }

@@ -39,14 +39,6 @@ export default function Header() {
               <FiSearch className="w-5 h-5" />
             </button>
 
-            {/* Login Publisher Button */}
-            <Link
-              href="/publisher/login"
-              className="px-4 py-2 text-gray-700 hover:text-[#fe7d17] transition-colors font-medium hidden sm:inline-block"
-            >
-              Login Publisher
-            </Link>
-
             {/* Investasi Sekarang Button */}
             <a
               href="https://xinxun.us"

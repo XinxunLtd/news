@@ -35,11 +35,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/publisher/login" className="text-gray-400 hover:text-[#fe7d17] transition-colors text-sm">
-                  Masuk sebagai Publisher
-                </Link>
-              </li>
-              <li>
                 <a
                   href="https://xinxun.us"
                   target="_blank"
@@ -56,9 +51,9 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Bantuan</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li> <FaEnvelope className="inline-block mr-2" /> <a href="mailto:help@xinxun.us" target="_blank" rel="noopener noreferrer"><span className="hidden">Email: </span>help@xinxun.us</a></li>
-              <li> <FaTelegram className="inline-block mr-2" /> <a href="https://t.me/xinxun_cs" target="_blank" rel="noopener noreferrer"><span className="hidden">Telegram CS: </span>@xinxun_cs</a></li>
-              <li> <FaTelegram className="inline-block mr-2" /> <a href="https://t.me/xinxun_group" target="_blank" rel="noopener noreferrer"><span className="hidden">Telegram Group: </span>@xinxun_group</a></li>
+              <li> <FaEnvelope className="inline-block mr-2" /> <a href="mailto:help@xinxun.us" target="_blank" rel="noopener noreferrer"><span className="hidden"></span>E-Mail</a></li>
+              <li> <FaTelegram className="inline-block mr-2" /> <a href="https://t.me/Xinxun_forindo" target="_blank" rel="noopener noreferrer"><span className="hidden"></span>XinXun Customer Service</a></li>
+              <li> <FaTelegram className="inline-block mr-2" /> <a href="https://t.me/+R4rZNjqcQ9FhMDRl" target="_blank" rel="noopener noreferrer"><span className="hidden"></span>XinXun Group</a></li>
             </ul>
           </div>
         </div>

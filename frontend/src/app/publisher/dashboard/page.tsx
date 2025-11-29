@@ -7,7 +7,6 @@ import { newsApi, publisherApi } from '@/lib/api'
 import type { News } from '@/types'
 import { FiEdit, FiTrash2, FiTrendingUp, FiFileText, FiClock, FiEye, FiX } from 'react-icons/fi'
 import toast from 'react-hot-toast'
-import PublisherSidebar from '@/components/PublisherSidebar'
 
 interface PublisherStatistics {
   total_published: number
@@ -82,10 +81,7 @@ export default function PublisherDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
-      <PublisherSidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto px-6 py-8">
+    <div className="container mx-auto px-6 py-8">
             <div className="mb-8">
               <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard Publisher</h1>
               <p className="text-gray-600">Kelola artikel Anda</p>
@@ -241,7 +237,6 @@ export default function PublisherDashboard() {
           )}
         </div>
         </div>
-      </div>
     </div>
   )
 }

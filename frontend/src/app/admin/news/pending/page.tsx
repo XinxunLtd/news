@@ -7,7 +7,6 @@ import { adminApi } from '@/lib/api'
 import toast from 'react-hot-toast'
 import type { News } from '@/types'
 import { FiCheck, FiX, FiEye } from 'react-icons/fi'
-import AdminSidebar from '@/components/AdminSidebar'
 
 export default function PendingNewsPage() {
   const [news, setNews] = useState<News[]>([])
@@ -50,10 +49,7 @@ export default function PendingNewsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <AdminSidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto px-6 py-8">
+    <div className="container mx-auto px-6 py-8">
         <div className="mb-8">
           <Link
             href="/admin/dashboard"
@@ -114,8 +110,6 @@ export default function PendingNewsPage() {
             </div>
           )}
         </div>
-        </div>
-      </div>
     </div>
   )
 }

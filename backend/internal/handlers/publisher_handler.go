@@ -57,69 +57,48 @@ func (h *PublisherHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Check if user exists by xinxun_number OR username (to handle all cases)
+	// Use FirstOrCreate to handle duplicate gracefully
 	username := "publisher_" + req.Number
-	user, err := h.userRepo.FindByUsernameOrXinxunNumber(username, req.Number)
+	hashedPassword, _ := services.HashPassword(req.Password)
+	xinxunID := uint(xinxunResp.Data.ID)
 	
+	// Prepare user data
+	newUser := &models.User{
+		Username:     username,
+		Name:         xinxunResp.Data.Name,
+		Email:        req.Number + "@xinxun.news",
+		PasswordHash: hashedPassword,
+		UserType:     models.UserTypePublisher,
+		XinxunID:     &xinxunID,
+		XinxunNumber: req.Number,
+		Balance:      xinxunResp.Data.Balance,
+		Status:       xinxunResp.Data.Status,
+		ReffCode:     xinxunResp.Data.ReffCode,
+	}
+	
+	// Use FirstOrCreate to handle race conditions and duplicates
+	user, err := h.userRepo.FirstOrCreate(newUser, username, req.Number)
 	if err != nil {
-		// User doesn't exist, create new publisher
-		hashedPassword, _ := services.HashPassword(req.Password)
-		xinxunID := uint(xinxunResp.Data.ID)
-		user = &models.User{
-			Username:     username,
-			Name:         xinxunResp.Data.Name,
-			Email:        req.Number + "@xinxun.news",
-			PasswordHash: hashedPassword,
-			UserType:     models.UserTypePublisher,
-			XinxunID:     &xinxunID,
-			XinxunNumber: req.Number,
-			Balance:      xinxunResp.Data.Balance,
-			Status:       xinxunResp.Data.Status,
-			ReffCode:     xinxunResp.Data.ReffCode,
-		}
-		if err := h.userRepo.Create(user); err != nil {
-			// If create fails (likely duplicate), try to find and update
-			existingUser, findErr := h.userRepo.FindByUsernameOrXinxunNumber(username, req.Number)
-			if findErr == nil && existingUser != nil {
-				user = existingUser
-				// Update all fields
-				user.XinxunNumber = req.Number
-				xinxunID := uint(xinxunResp.Data.ID)
-				user.XinxunID = &xinxunID
-				user.Name = xinxunResp.Data.Name
-				user.Balance = xinxunResp.Data.Balance
-				user.Status = xinxunResp.Data.Status
-				user.ReffCode = xinxunResp.Data.ReffCode
-				hashedPassword, _ := services.HashPassword(req.Password)
-				user.PasswordHash = hashedPassword
-				if updateErr := h.userRepo.Update(user); updateErr != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user: " + updateErr.Error()})
-					return
-				}
-			} else {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user: " + err.Error()})
-				return
-			}
-		}
-	} else {
-		// User exists, update user data from xinxun
-		user.Name = xinxunResp.Data.Name
-		user.Balance = xinxunResp.Data.Balance
-		user.Status = xinxunResp.Data.Status
-		user.ReffCode = xinxunResp.Data.ReffCode
-		xinxunID := uint(xinxunResp.Data.ID)
-		user.XinxunID = &xinxunID
-		// Ensure xinxun_number is set
-		if user.XinxunNumber == "" {
-			user.XinxunNumber = req.Number
-		}
-		// Update password
-		hashedPassword, _ := services.HashPassword(req.Password)
-		user.PasswordHash = hashedPassword
-		if err := h.userRepo.Update(user); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user: " + err.Error()})
-			return
-		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create/update user: " + err.Error()})
+		return
+	}
+	
+	// Update user data from xinxun (always update to sync latest data)
+	user.Name = xinxunResp.Data.Name
+	user.Balance = xinxunResp.Data.Balance
+	user.Status = xinxunResp.Data.Status
+	user.ReffCode = xinxunResp.Data.ReffCode
+	user.XinxunID = &xinxunID
+	// Ensure xinxun_number is set
+	if user.XinxunNumber == "" {
+		user.XinxunNumber = req.Number
+	}
+	// Update password
+	user.PasswordHash = hashedPassword
+	
+	if err := h.userRepo.Update(user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user: " + err.Error()})
+		return
 	}
 
 	// Generate JWT token
