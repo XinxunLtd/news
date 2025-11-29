@@ -4,19 +4,28 @@ import type { NewsResponse, SingleNewsResponse, Category, News, Tag } from '@/ty
 // Get API URL based on environment
 // Server-side (SSR): use service name in Docker, localhost for local dev
 // Client-side: always use localhost (accessed from browser)
-const getApiUrl = (): string => {
+export const getApiUrl = (): string => {
   // Server-side rendering (no window object)
   if (typeof window === 'undefined') {
     // In Docker, use service name. For local dev, use localhost
     const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/v1'
-    // Ensure it uses /v1, not /api
-    return apiUrl.replace('/api', '/v1')
+    // Ensure it uses /v1, not /api, and fix any wrong domain
+    return apiUrl
+      .replace('/api', '/v1')
+      .replace('v1-news.xinxun.us', 'api-news.xinxun.us')
+      .replace('https://v1-news', 'https://api-news')
+      .replace('http://v1-news', 'http://api-news')
   }
   // Client-side: try NEXT_PUBLIC_API_URL first, then fallback to 127.0.0.1 if localhost doesn't work
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080/v1'
   // Replace localhost with 127.0.0.1 for better Windows compatibility
-  // Ensure it uses /v1, not /api
-  return apiUrl.replace('localhost', '127.0.0.1').replace('/api', '/v1')
+  // Ensure it uses /v1, not /api, and fix any wrong domain
+  return apiUrl
+    .replace('localhost', '127.0.0.1')
+    .replace('/api', '/v1')
+    .replace('v1-news.xinxun.us', 'api-news.xinxun.us')
+    .replace('https://v1-news', 'https://api-news')
+    .replace('http://v1-news', 'http://api-news')
 }
 
 // Cache for axios instances

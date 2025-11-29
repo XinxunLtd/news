@@ -2,7 +2,7 @@
 
 import { useState, useEffect, FormEvent } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { newsApi, categoryApi, adminApi, adminCategoryApi, tagApi } from '@/lib/api'
+import { newsApi, categoryApi, adminApi, adminCategoryApi, tagApi, getApiUrl } from '@/lib/api'
 import type { Category, News, Tag } from '@/types'
 import toast from 'react-hot-toast'
 import RichTextEditor from '@/components/RichTextEditor'
@@ -108,7 +108,7 @@ export default function EditNewsPage() {
       if (thumbnailFile) {
         const formDataUpload = new FormData()
         formDataUpload.append('image', thumbnailFile)
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/upload`, {
+        const response = await fetch(`${getApiUrl()}/admin/upload`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -129,7 +129,7 @@ export default function EditNewsPage() {
         const uploadPromises = Array.from(contentImages.entries()).map(async ([base64, file]) => {
           const formData = new FormData()
           formData.append('image', file)
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/upload`, {
+          const response = await fetch(`${getApiUrl()}/admin/upload`, {
             method: 'POST',
             headers: {
               Authorization: `Bearer ${token}`,
@@ -162,7 +162,7 @@ export default function EditNewsPage() {
         try {
           const key = thumbnailToDelete.split('s3.amazonaws.com/')[1]?.split('?')[0]
           if (key) {
-            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/upload/delete`, {
+            await fetch(`${getApiUrl()}/admin/upload/delete`, {
               method: 'DELETE',
               headers: {
                 Authorization: `Bearer ${token}`,

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, FormEvent } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { newsApi, categoryApi, publisherApi } from '@/lib/api'
+import { newsApi, categoryApi, publisherApi, getApiUrl } from '@/lib/api'
 import type { Category, News } from '@/types'
 import toast from 'react-hot-toast'
 import RichTextEditor from '@/components/RichTextEditor'
@@ -107,7 +107,7 @@ export default function EditPublisherNewsPage() {
       if (thumbnailFile) {
         const formDataUpload = new FormData()
         formDataUpload.append('image', thumbnailFile)
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/upload`, {
+        const response = await fetch(`${getApiUrl()}/admin/upload`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,

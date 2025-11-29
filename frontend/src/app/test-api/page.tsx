@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import axios from 'axios'
+import { getApiUrl } from '@/lib/api'
 
 export default function TestApiPage() {
   const [result, setResult] = useState<any>(null)
@@ -11,7 +12,7 @@ export default function TestApiPage() {
     setLoading(true)
     setResult(null)
     
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/v1'
+    const apiUrl = getApiUrl()
     console.log('Testing API URL:', apiUrl)
     
     try {
@@ -52,7 +53,7 @@ export default function TestApiPage() {
         <h1 className="text-2xl font-bold mb-4">API Connection Test</h1>
         
         <div className="mb-4">
-          <p className="mb-2">API URL: <code className="bg-gray-100 px-2 py-1 rounded">{process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/v1'}</code></p>
+          <p className="mb-2">API URL: <code className="bg-gray-100 px-2 py-1 rounded">{getApiUrl()}</code></p>
           <button
             onClick={testBackend}
             disabled={loading}
