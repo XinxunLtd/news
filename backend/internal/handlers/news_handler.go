@@ -290,32 +290,38 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 			newsSlug = newsSlug + "-" + strconv.FormatInt(time.Now().Unix(), 10)
 		}
 
+		// Use provided values or fallback to original
+		revisionTitle := req.Title
+		if revisionTitle == "" {
+			revisionTitle = news.Title
+		}
+		revisionContent := req.Content
+		if revisionContent == "" {
+			revisionContent = news.Content
+		}
+		revisionExcerpt := req.Excerpt
+		if revisionExcerpt == "" {
+			revisionExcerpt = news.Excerpt
+		}
+		revisionThumbnail := req.Thumbnail
+		if revisionThumbnail == "" {
+			revisionThumbnail = news.Thumbnail
+		}
+		revisionCategoryID := req.CategoryID
+		if revisionCategoryID == 0 {
+			revisionCategoryID = news.CategoryID
+		}
+
 		revision := &models.News{
-			Title:      req.Title,
+			Title:      revisionTitle,
 			Slug:       newsSlug,
-			Content:    req.Content,
-			Excerpt:    req.Excerpt,
-			Thumbnail:  req.Thumbnail,
-			CategoryID: req.CategoryID,
+			Content:    revisionContent,
+			Excerpt:    revisionExcerpt,
+			Thumbnail:  revisionThumbnail,
+			CategoryID: revisionCategoryID,
 			AuthorID:   news.AuthorID,
 			Status:     models.StatusPending,
 			RevisionOf: &news.ID, // Link to original
-		}
-
-		if req.Title == "" {
-			revision.Title = news.Title
-		}
-		if req.Content == "" {
-			revision.Content = news.Content
-		}
-		if req.Excerpt == "" {
-			revision.Excerpt = news.Excerpt
-		}
-		if req.Thumbnail == "" {
-			revision.Thumbnail = news.Thumbnail
-		}
-		if req.CategoryID == 0 {
-			revision.CategoryID = news.CategoryID
 		}
 
 		// Validate category access

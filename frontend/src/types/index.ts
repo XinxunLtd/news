@@ -15,6 +15,7 @@ export interface News {
   status: 'draft' | 'published' | 'pending' | 'rejected'
   reward_amount?: number
   is_rewarded?: boolean
+  revision_of?: number | null
   created_at: string
   updated_at: string
 }
