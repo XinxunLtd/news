@@ -258,6 +258,9 @@ export default function NewNewsPage() {
                 required
                 className="input-field"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Ukuran gambar disarankan 1200x628px, ukuran file disarankan 1MB.
+              </p>
               {formData.thumbnail && (
                 <div className="mt-2">
                   <Image
