@@ -44,6 +44,11 @@ export default function Footer() {
                   Website XinXun
                 </a>
               </li>
+              <li> 
+                <Link href="/publisher/login" className="text-gray-400 hover:text-[#fe7d17] transition-colors text-sm">
+                  Masuk sebagai Publisher
+                </Link>
+              </li>
             </ul>
           </div>
 
