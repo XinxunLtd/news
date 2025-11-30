@@ -149,11 +149,12 @@ export default function EditNewsPage() {
         })
       }
 
-      // Update database
+      // Update database - ensure category_id is always sent
       await adminApi.updateNews(parseInt(params.id as string), {
         ...formData,
         content: finalContent,
         thumbnail: finalThumbnail,
+        category_id: formData.category_id || news?.category_id || 0, // Always include category_id
         tag_ids: selectedTagIds,
       })
 

@@ -56,7 +56,7 @@ export default function NewsCard({ news, featured = false }: NewsCardProps) {
   }
 
   return (
-    <Link href={`/news/${news.slug}`} className="block">
+    <Link href={`/${news.slug}`} className="block">
       <article className="card group h-full">
         <div className="relative h-48 overflow-hidden">
           {news.thumbnail ? (

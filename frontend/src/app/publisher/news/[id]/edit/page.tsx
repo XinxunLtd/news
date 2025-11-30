@@ -22,6 +22,7 @@ export default function EditPublisherNewsPage() {
     thumbnail: '',
     category_id: 0,
   })
+  const [contentImages, setContentImages] = useState<Map<string, File>>(new Map()) // Store base64->File mapping
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null) // Store thumbnail file for upload on submit
   const [oldThumbnail, setOldThumbnail] = useState<string>('') // To track original thumbnail for deletion
 
@@ -119,9 +120,37 @@ export default function EditPublisherNewsPage() {
         finalThumbnail = data.url
       }
 
+      // Upload all content images first
+      let finalContent = formData.content
+      if (contentImages.size > 0) {
+        const uploadPromises = Array.from(contentImages.entries()).map(async ([base64, file]) => {
+          const formDataUpload = new FormData()
+          formDataUpload.append('image', file)
+          const response = await fetch(`${getApiUrl()}/admin/upload`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formDataUpload,
+          })
+          if (!response.ok) throw new Error('Upload gambar konten gagal')
+          const data = await response.json()
+          return { base64, url: data.url }
+        })
+
+        const uploadResults = await Promise.all(uploadPromises)
+
+        // Replace base64 images with S3 URLs in content
+        uploadResults.forEach(({ base64, url }) => {
+          finalContent = finalContent.replace(base64, url)
+        })
+      }
+
       await publisherApi.updateNews(parseInt(params.id as string), {
         ...formData,
+        content: finalContent,
         thumbnail: finalThumbnail,
+        category_id: formData.category_id || news?.category_id || 0, // Always include category_id
       })
       toast.success('Artikel berhasil diperbarui!')
       router.push('/publisher/dashboard')
@@ -130,6 +159,14 @@ export default function EditPublisherNewsPage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleImageAdded = (base64: string, file: File) => {
+    setContentImages((prev) => {
+      const newMap = new Map(prev)
+      newMap.set(base64, file)
+      return newMap
+    })
   }
 
   const handleThumbnailFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -224,6 +261,7 @@ export default function EditPublisherNewsPage() {
               value={formData.content}
               onChange={(value) => setFormData({ ...formData, content: value })}
               placeholder="Tulis konten artikel di sini..."
+              onImageAdded={handleImageAdded}
             />
           </div>
 

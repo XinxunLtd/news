@@ -32,16 +32,23 @@ type ApproveNewsRequest struct {
 
 // ApproveNews approves a pending news and gives reward to publisher
 func (h *AdminHandler) ApproveNews(c *gin.Context) {
+	// Verify user is admin
+	userType, exists := c.Get("user_type")
+	if !exists || userType != string(models.UserTypeAdmin) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Hanya admin yang dapat approve artikel"})
+		return
+	}
+
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
 
 	news, err := h.newsRepo.FindByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Artikel tidak"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Artikel tidak ditemukan"})
 		return
 	}
 
 	if news.Status != models.StatusPending {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Artiker tidak berstatus pending"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Artikel tidak berstatus pending"})
 		return
 	}
 
@@ -169,6 +176,13 @@ func (h *AdminHandler) ApproveNews(c *gin.Context) {
 
 // RejectNews rejects a pending news
 func (h *AdminHandler) RejectNews(c *gin.Context) {
+	// Verify user is admin
+	userType, exists := c.Get("user_type")
+	if !exists || userType != string(models.UserTypeAdmin) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Hanya admin yang dapat reject artikel"})
+		return
+	}
+
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
 
 	news, err := h.newsRepo.FindByID(uint(id))

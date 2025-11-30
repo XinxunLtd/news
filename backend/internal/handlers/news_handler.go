@@ -305,7 +305,7 @@ type UpdateNewsRequest struct {
 	Content    string `json:"content"`
 	Excerpt    string `json:"excerpt"`
 	Thumbnail  string `json:"thumbnail"`
-	CategoryID uint   `json:"category_id"`
+	CategoryID *uint  `json:"category_id"` // Use pointer to distinguish between "not provided" and "0"
 	TagIDs     []uint `json:"tag_ids"`
 	Status     string `json:"status"`
 }
@@ -364,9 +364,9 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 		if revisionThumbnail == "" {
 			revisionThumbnail = news.Thumbnail
 		}
-		revisionCategoryID := req.CategoryID
-		if revisionCategoryID == 0 {
-			revisionCategoryID = news.CategoryID
+		revisionCategoryID := news.CategoryID // Default to original
+		if req.CategoryID != nil {
+			revisionCategoryID = *req.CategoryID
 		}
 
 		revision := &models.News{
@@ -381,9 +381,9 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 			RevisionOf: &news.ID, // Link to original
 		}
 
-		// Validate category access
-		if req.CategoryID > 0 {
-			category, err := h.categoryRepo.FindByID(req.CategoryID)
+		// Validate category access if category is being changed
+		if req.CategoryID != nil {
+			category, err := h.categoryRepo.FindByID(*req.CategoryID)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Kategori tidak ditemukan"})
 				return
@@ -468,21 +468,26 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 	if req.Thumbnail != "" {
 		news.Thumbnail = req.Thumbnail
 	}
-	if req.CategoryID > 0 {
+	// Update category if provided (using pointer to distinguish between "not provided" and "0")
+	if req.CategoryID != nil {
+		// Validate category exists
+		category, err := h.categoryRepo.FindByID(*req.CategoryID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Kategori tidak ditemukan"})
+			return
+		}
+
 		// Validate category access for publisher - publisher cannot use admin-only categories
 		userType, _ := c.Get("user_type")
 		if userType == string(models.UserTypePublisher) {
-			category, err := h.categoryRepo.FindByID(req.CategoryID)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Kategori tidak ditemukan"})
-				return
-			}
 			if category.IsAdminOnly {
 				c.JSON(http.StatusForbidden, gin.H{"error": "Kategori ini hanya untuk admin. Hanya admin yang dapat memublikasikan artikel dengan kategori ini."})
 				return
 			}
 		}
-		news.CategoryID = req.CategoryID
+
+		// Update category
+		news.CategoryID = *req.CategoryID
 	}
 	if req.Status != "" {
 		if req.Status == "published" {

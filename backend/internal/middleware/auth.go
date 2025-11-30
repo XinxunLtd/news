@@ -46,12 +46,23 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		userID := claims["user_id"].(float64)
-		userType, _ := claims["user_type"].(string)
-		c.Set("user_id", uint(userID))
-		if userType != "" {
-			c.Set("user_type", userType)
+		// Safe type assertion with validation
+		userIDFloat, ok := claims["user_id"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token claims user_id tidak valid"})
+			c.Abort()
+			return
 		}
+
+		userType, ok := claims["user_type"].(string)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token claims user_type tidak valid"})
+			c.Abort()
+			return
+		}
+
+		c.Set("user_id", uint(userIDFloat))
+		c.Set("user_type", userType)
 		c.Next()
 	}
 }

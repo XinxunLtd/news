@@ -35,10 +35,18 @@ func (h *PublisherHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Validate number starts with 8
-	if len(req.Number) == 0 || req.Number[0] != '8' {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Nomor telepon harus dimulai dengan 8"})
+	// Validate phone number format (must start with 8 and have 10-13 digits)
+	if len(req.Number) < 10 || len(req.Number) > 13 || req.Number[0] != '8' {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Nomor telepon harus dimulai dengan 8 dan memiliki 10-13 digit"})
 		return
+	}
+
+	// Validate that all characters are digits
+	for _, ch := range req.Number {
+		if ch < '0' || ch > '9' {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Nomor telepon hanya boleh berisi angka"})
+			return
+		}
 	}
 
 	// Login to xinxun.us API

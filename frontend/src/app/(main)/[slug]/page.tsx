@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { newsApi } from '@/lib/api'
 import Image from 'next/image'
-import { formatDate } from '@/lib/utils'
+import { formatDate, sanitizeHtml } from '@/lib/utils'
 import { FiClock, FiEye } from 'react-icons/fi'
 import Link from 'next/link'
 import NewsCard from '@/components/NewsCard'
@@ -180,7 +180,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
           {/* Content */}
           <div
             className="prose prose-lg max-w-none mb-12"
-            dangerouslySetInnerHTML={{ __html: news.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(news.content) }}
           />
 
           {/* Tags */}

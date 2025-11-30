@@ -56,7 +56,11 @@ func seedDatabase() {
 	log.Println("Seeding database...")
 
 	// Create admin user
-	hashedPassword, _ := services.HashPassword("admin123")
+	hashedPassword, err := services.HashPassword("admin123")
+	if err != nil {
+		log.Printf("Error hashing password: %v", err)
+		return
+	}
 	admin := models.User{
 		Username:     "admin",
 		Name:         "Admin Xinxun",

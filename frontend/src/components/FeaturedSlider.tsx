@@ -12,6 +12,7 @@ export default function FeaturedSlider() {
   const [news, setNews] = useState<News[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadFeaturedNews()
@@ -21,8 +22,10 @@ export default function FeaturedSlider() {
     try {
       const response = await newsApi.getFeatured(5)
       setNews(response.data)
+      setError(null)
     } catch (error) {
       console.error('Failed to load featured news:', error)
+      setError('Gagal memuat berita unggulan')
     } finally {
       setLoading(false)
     }
@@ -37,8 +40,16 @@ export default function FeaturedSlider() {
     }
   }, [news.length])
 
-  if (loading || news.length === 0) {
-    return null
+  if (loading) {
+    return (
+      <div className="relative mb-12 h-64 md:h-96 bg-gray-200 animate-pulse rounded-lg flex items-center justify-center">
+        <p className="text-gray-500">Memuat berita unggulan...</p>
+      </div>
+    )
+  }
+
+  if (error || news.length === 0) {
+    return null // Silently hide slider if error or no news
   }
 
   const goToSlide = (index: number) => {

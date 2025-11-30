@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 import type { News } from '@/types'
 import { FiCheck, FiX, FiArrowLeft } from 'react-icons/fi'
 import Image from 'next/image'
-import { formatDate } from '@/lib/utils'
+import { formatDate, sanitizeHtml } from '@/lib/utils'
 import RewardModal from '@/components/RewardModal'
 import NewsPreviewModal from '@/components/NewsPreviewModal'
 
@@ -185,7 +185,7 @@ export default function PendingNewsDetailPage() {
               {/* Content */}
               <div
                 className="prose prose-lg max-w-none mb-12"
-                dangerouslySetInnerHTML={{ __html: news.content }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(news.content) }}
               />
 
               {/* Tags */}

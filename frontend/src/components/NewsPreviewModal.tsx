@@ -2,7 +2,7 @@
 
 import { Fragment } from 'react'
 import Image from 'next/image'
-import { formatDate } from '@/lib/utils'
+import { formatDate, sanitizeHtml } from '@/lib/utils'
 import { FiX, FiClock, FiEye } from 'react-icons/fi'
 import type { Category, User, Tag } from '@/types'
 
@@ -112,7 +112,7 @@ export default function NewsPreviewModal({ isOpen, onClose, news }: NewsPreviewM
             {/* Content */}
             <div
               className="prose prose-lg max-w-none mb-12"
-              dangerouslySetInnerHTML={{ __html: newsData.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(newsData.content) }}
             />
 
             {/* Tags */}
