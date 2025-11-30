@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useEffect } from 'react'
 import dynamic from 'next/dynamic'
+import toast from 'react-hot-toast'
 import 'react-quill/dist/quill.snow.css'
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
@@ -50,15 +51,15 @@ export default function RichTextEditor({ value, onChange, placeholder, onImageAd
               const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/heic', 'image/heif', 'image/webp', 'image/gif']
               const allowedExtensions = ['.png', '.jpg', '.jpeg', '.heic', '.heif', '.webp', '.gif']
               const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'))
-              
+
               if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
-                alert('Format file tidak didukung. Gunakan PNG, JPG, JPEG, HEIC, WEBP, atau GIF')
+                toast.error('Format file tidak didukung. Gunakan PNG, JPG, JPEG, HEIC, WEBP, atau GIF')
                 return
               }
 
               // Validate file size (max 10MB)
               if (file.size > 10 * 1024 * 1024) {
-                alert('Ukuran file maksimal 10MB')
+                toast.error('Ukuran file maksimal 10MB')
                 return
               }
 

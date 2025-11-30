@@ -15,6 +15,7 @@ export default function EditPublisherNewsPage() {
   const [news, setNews] = useState<News | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -35,6 +36,34 @@ export default function EditPublisherNewsPage() {
 
     loadData()
   }, [router, params])
+
+  // Track unsaved changes
+  useEffect(() => {
+    if (!news) return
+
+    const hasChanges =
+      formData.title !== news.title ||
+      formData.content !== news.content ||
+      formData.excerpt !== news.excerpt ||
+      formData.category_id !== news.category_id ||
+      thumbnailFile !== null ||
+      contentImages.size > 0
+
+    setHasUnsavedChanges(hasChanges)
+  }, [formData, thumbnailFile, contentImages, news])
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges && !saving) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [hasUnsavedChanges, saving])
 
   const loadData = async () => {
     try {
@@ -153,11 +182,22 @@ export default function EditPublisherNewsPage() {
         category_id: formData.category_id || news?.category_id || 0, // Always include category_id
       })
       toast.success('Artikel berhasil diperbarui!')
+      setHasUnsavedChanges(false) // Clear unsaved changes flag
       router.push('/publisher/dashboard')
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Gagal memperbarui artikel')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      if (confirm('Anda memiliki perubahan yang belum disimpan. Yakin ingin membatalkan?')) {
+        router.back()
+      }
+    } else {
+      router.back()
     }
   }
 
@@ -207,17 +247,44 @@ export default function EditPublisherNewsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Memuat...</p>
+      <div className="container mx-auto px-6 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+          <div className="bg-white rounded-lg shadow p-8 space-y-6">
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-20"></div>
+              <div className="h-10 bg-gray-200 rounded"></div>
+            </div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-20"></div>
+              <div className="h-24 bg-gray-200 rounded"></div>
+            </div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-20"></div>
+              <div className="h-64 bg-gray-200 rounded"></div>
+            </div>
+            <div className="flex gap-3">
+              <div className="h-10 bg-gray-200 rounded w-32"></div>
+              <div className="h-10 bg-gray-200 rounded w-32"></div>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="container mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Edit Artikel</h1>
+      <div className="flex items-center gap-3 mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Edit Artikel</h1>
+        {hasUnsavedChanges && (
+          <span className="text-sm px-3 py-1 bg-orange-100 text-orange-700 rounded-full">
+            Perubahan belum disimpan
+          </span>
+        )}
+      </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-8 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-8 space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Judul *
@@ -300,12 +367,18 @@ export default function EditPublisherNewsPage() {
               required
               className="input-field"
             >
-              <option value={0}>Pilih kategori</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
+              {categories.length === 0 ? (
+                <option value={0}>Memuat kategori...</option>
+              ) : (
+                <>
+                  <option value={0} disabled>Pilih kategori</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </>
+              )}
             </select>
           </div>
 
@@ -329,7 +402,7 @@ export default function EditPublisherNewsPage() {
             </button>
             <button
               type="button"
-              onClick={() => router.back()}
+              onClick={handleCancel}
               className="btn-secondary"
             >
               Batal

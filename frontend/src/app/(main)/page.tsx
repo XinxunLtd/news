@@ -75,7 +75,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           {categoriesData.data.map((cat) => (
             <Link
               key={cat.id}
-              href={`/?category=${cat.slug}`}
+              href={`/?category=${encodeURIComponent(cat.slug)}`}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
                 category === cat.slug
                   ? 'bg-[#fe7d17] text-white'
