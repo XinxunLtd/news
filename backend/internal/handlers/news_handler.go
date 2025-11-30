@@ -145,13 +145,13 @@ func (h *NewsHandler) GetNewsBySlug(c *gin.Context) {
 		"health":     true,
 	}
 	if reservedPaths[slug] {
-		c.JSON(http.StatusNotFound, gin.H{"error": "News not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Artikel tidak ditemukan"})
 		return
 	}
 
 	news, err := h.newsRepo.FindBySlug(slug)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "News not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Artikel tidak ditemukan"})
 		return
 	}
 
@@ -164,7 +164,7 @@ func (h *NewsHandler) GetNewsBySlug(c *gin.Context) {
 func (h *NewsHandler) SearchNews(c *gin.Context) {
 	query := c.Query("q")
 	if query == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Query parameter 'q' is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Parameter query 'q' wajib diisi"})
 		return
 	}
 
@@ -220,14 +220,14 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 	// Validate title length (max 100 words)
 	titleWords := strings.Fields(strings.TrimSpace(req.Title))
 	if len(titleWords) > 100 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Title must not exceed 100 words"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Judul tidak boleh lebih dari 100 kata"})
 		return
 	}
 
 	// Validate excerpt length (max 200 words)
 	excerptWords := strings.Fields(strings.TrimSpace(req.Excerpt))
 	if len(excerptWords) > 200 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Excerpt must not exceed 200 words"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Excerpt tidak boleh lebih dari 200 kata"})
 		return
 	}
 
@@ -235,11 +235,11 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 	if userType == string(models.UserTypePublisher) {
 		category, err := h.categoryRepo.FindByID(req.CategoryID)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Category not found"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Kategori tidak ditemukan"})
 			return
 		}
 		if category.IsAdminOnly {
-			c.JSON(http.StatusForbidden, gin.H{"error": "This category is restricted to admin only. Only admin can publish news with this category."})
+			c.JSON(http.StatusForbidden, gin.H{"error": "Kategori ini hanya untuk admin. Hanya admin yang dapat memublikasikan artikel dengan kategori ini."})
 			return
 		}
 	}
@@ -315,7 +315,7 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 
 	news, err := h.newsRepo.FindByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "News not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Artikel tidak ditemukan"})
 		return
 	}
 
@@ -324,7 +324,7 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 
 	// Check if user owns this news (for publisher)
 	if userType == string(models.UserTypePublisher) && news.AuthorID != userID.(uint) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You can only edit your own news"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Anda hanya dapat mengedit artikel milik Anda sendiri"})
 		return
 	}
 
@@ -385,11 +385,11 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 		if req.CategoryID > 0 {
 			category, err := h.categoryRepo.FindByID(req.CategoryID)
 			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Category not found"})
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Kategori tidak ditemukan"})
 				return
 			}
 			if category.IsAdminOnly {
-				c.JSON(http.StatusForbidden, gin.H{"error": "This category is restricted to admin only"})
+				c.JSON(http.StatusForbidden, gin.H{"error": "Kategori ini hanya untuk admin. Hanya admin yang dapat memublikasikan artikel dengan kategori ini."})
 				return
 			}
 		}
@@ -398,7 +398,7 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 		if req.Title != "" {
 			titleWords := strings.Fields(strings.TrimSpace(req.Title))
 			if len(titleWords) > 100 {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Title must not exceed 100 words"})
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Judul tidak boleh lebih dari 100 kata"})
 				return
 			}
 		}
@@ -407,7 +407,7 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 		if req.Excerpt != "" {
 			excerptWords := strings.Fields(strings.TrimSpace(req.Excerpt))
 			if len(excerptWords) > 200 {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Excerpt must not exceed 200 words"})
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Excerpt tidak boleh lebih dari 200 kata"})
 				return
 			}
 		}
@@ -437,7 +437,7 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusCreated, gin.H{
-			"message": "Revision created. Waiting for admin approval.",
+			"message": "Revisi berhasil dibuat. Menunggu approval admin.",
 			"data":    createdRevision,
 		})
 		return
@@ -447,7 +447,7 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 		// Validate title length (max 100 words)
 		titleWords := strings.Fields(strings.TrimSpace(req.Title))
 		if len(titleWords) > 100 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Title must not exceed 100 words"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Judul tidak boleh lebih dari 100 kata"})
 			return
 		}
 		news.Title = req.Title
@@ -460,7 +460,7 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 		// Validate excerpt length (max 200 words)
 		excerptWords := strings.Fields(strings.TrimSpace(req.Excerpt))
 		if len(excerptWords) > 200 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Excerpt must not exceed 200 words"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Excerpt tidak boleh lebih dari 200 kata"})
 			return
 		}
 		news.Excerpt = req.Excerpt
@@ -474,11 +474,11 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 		if userType == string(models.UserTypePublisher) {
 			category, err := h.categoryRepo.FindByID(req.CategoryID)
 			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Category not found"})
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Kategori tidak ditemukan"})
 				return
 			}
 			if category.IsAdminOnly {
-				c.JSON(http.StatusForbidden, gin.H{"error": "This category is restricted to admin only. Only admin can publish news with this category."})
+				c.JSON(http.StatusForbidden, gin.H{"error": "Kategori ini hanya untuk admin. Hanya admin yang dapat memublikasikan artikel dengan kategori ini."})
 				return
 			}
 		}
@@ -519,5 +519,5 @@ func (h *NewsHandler) DeleteNews(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "News deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Artikel berhasil dihapus"})
 }

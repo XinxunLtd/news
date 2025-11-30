@@ -19,7 +19,7 @@ func UploadImage(c *gin.Context) {
 	file, err := c.FormFile("image")
 	if err != nil {
 		log.Printf("[UploadImage] Error getting file from form: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No image file provided"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Tidak ada file gambar yang diberikan"})
 		return
 	}
 
@@ -29,7 +29,7 @@ func UploadImage(c *gin.Context) {
 	src, err := file.Open()
 	if err != nil {
 		log.Printf("[UploadImage] Error opening file: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to open file"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal membuka file"})
 		return
 	}
 	defer src.Close()
@@ -38,7 +38,7 @@ func UploadImage(c *gin.Context) {
 	fileData, err := io.ReadAll(src)
 	if err != nil {
 		log.Printf("[UploadImage] Error reading file data: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal membaca data file"})
 		return
 	}
 
@@ -57,7 +57,7 @@ func UploadImage(c *gin.Context) {
 	if err != nil {
 		log.Printf("[UploadImage] S3 upload failed: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to upload to S3: " + err.Error(),
+			"error": "Gagal mengupload ke Gambar",
 		})
 		return
 	}

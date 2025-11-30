@@ -32,7 +32,7 @@ export default function PublishersPage() {
         localStorage.removeItem('admin_token')
         router.push('/admin/login')
       } else {
-        toast.error('Gagal memuat data publisher')
+        toast.error('Gagal memuat data publisher. Silakan coba lagi.')
       }
     } finally {
       setLoading(false)
@@ -47,7 +47,7 @@ export default function PublishersPage() {
       toast.success('Publisher berhasil dihapus')
       loadPublishers()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Gagal menghapus publisher')
+      toast.error(error.response?.data?.error || 'Gagal menghapus publisher. Silakan coba lagi.')
     }
   }
 

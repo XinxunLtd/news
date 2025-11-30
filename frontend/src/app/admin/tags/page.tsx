@@ -34,7 +34,7 @@ export default function TagsPage() {
         localStorage.removeItem('admin_token')
         router.push('/admin/login')
       } else {
-        toast.error('Gagal memuat tags')
+        toast.error('Gagal memuat tags. Silakan coba lagi.')
       }
     } finally {
       setLoading(false)
@@ -56,7 +56,7 @@ export default function TagsPage() {
       setFormData({ name: '' })
       loadTags()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Gagal menyimpan tag')
+      toast.error(error.response?.data?.error || 'Gagal menyimpan tag. Silakan coba lagi.')
     }
   }
 
@@ -74,7 +74,7 @@ export default function TagsPage() {
       toast.success('Tag berhasil dihapus')
       loadTags()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Gagal menghapus tag')
+      toast.error(error.response?.data?.error || 'Gagal menghapus tag. Silakan coba lagi.')
     }
   }
 

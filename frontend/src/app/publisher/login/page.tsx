@@ -56,9 +56,9 @@ export default function PublisherLoginPage() {
     } catch (error: any) {
       console.error('Login error:', error)
       if (error.code === 'ECONNREFUSED' || error.message?.includes('Network Error') || error.message?.includes('timeout')) {
-        toast.error('Tidak dapat terhubung ke server. Pastikan backend sedang berjalan di http://localhost:8080')
+        toast.error('Tidak dapat terhubung ke server. Mohon tunggu beberapa saat dan coba lagi.')
       } else {
-        toast.error(error.response?.data?.message || error.message || 'Login gagal')
+        toast.error(error.response?.data?.message || error.message || 'Login gagal. Silakan coba lagi.')
       }
     } finally {
       setLoading(false)
@@ -77,7 +77,7 @@ export default function PublisherLoginPage() {
           </p>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
             <p className="text-sm text-blue-800 text-center">
-              Masukkan nomor telepon Anda (akan otomatis ditambahkan +62)
+              Masukkan nomor telepon Anda
             </p>
           </div>
 

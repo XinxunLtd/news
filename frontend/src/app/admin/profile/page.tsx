@@ -45,7 +45,7 @@ export default function ProfilePage() {
         localStorage.removeItem('admin_user')
         router.push('/admin/login')
       } else {
-        toast.error('Gagal memuat profil')
+        toast.error('Gagal memuat profil. Silakan coba lagi.')
       }
     } finally {
       setLoading(false)
@@ -84,7 +84,7 @@ export default function ProfilePage() {
         confirmPassword: '',
       })
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Gagal memperbarui profil')
+      toast.error(error.response?.data?.error || 'Gagal memperbarui profil. Silakan coba lagi.')
     } finally {
       setSaving(false)
     }

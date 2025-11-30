@@ -34,7 +34,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 
 	user, err := h.userRepo.FindByID(userID.(uint))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "User tidak ditemukan"})
 		return
 	}
 
@@ -48,7 +48,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		// Check if username already exists (except current user)
 		existing, _ := h.userRepo.FindByUsername(req.Username)
 		if existing != nil && existing.ID != user.ID {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Username already exists"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Username sudah ada"})
 			return
 		}
 		user.Username = req.Username
@@ -60,12 +60,12 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 
 	if req.Password != "" {
 		if len(req.Password) < 6 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Password must be at least 6 characters"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Password harus minimal 6 karakter"})
 			return
 		}
 		hashedPassword, err := services.HashPassword(req.Password)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menghash password"})
 			return
 		}
 		user.PasswordHash = hashedPassword
@@ -77,12 +77,12 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Profile updated successfully",
+		"message": "Profile berhasil diupdate",
 		"data": gin.H{
-			"id":       user.ID,
-			"username": user.Username,
-			"name":     user.Name,
-			"email":    user.Email,
+			"id":        user.ID,
+			"username":  user.Username,
+			"name":      user.Name,
+			"email":     user.Email,
 			"user_type": user.UserType,
 		},
 	})
@@ -94,23 +94,23 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 
 	user, err := h.userRepo.FindByID(userID.(uint))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "User tidak ditemukan"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"data": gin.H{
-			"id":           user.ID,
-			"username":     user.Username,
-			"name":         user.Name,
-			"email":        user.Email,
-			"user_type":    user.UserType,
-			"xinxun_id":    user.XinxunID,
+			"id":            user.ID,
+			"username":      user.Username,
+			"name":          user.Name,
+			"email":         user.Email,
+			"user_type":     user.UserType,
+			"xinxun_id":     user.XinxunID,
 			"xinxun_number": user.XinxunNumber,
-			"balance":      user.Balance,
-			"status":       user.Status,
-			"reff_code":    user.ReffCode,
-			"created_at":   user.CreatedAt,
+			"balance":       user.Balance,
+			"status":        user.Status,
+			"reff_code":     user.ReffCode,
+			"created_at":    user.CreatedAt,
 		},
 	})
 }
@@ -120,7 +120,7 @@ func (h *UserHandler) GetAllPublishers(c *gin.Context) {
 	// Get user type to check if admin
 	userType, exists := c.Get("user_type")
 	if !exists || userType != string(models.UserTypeAdmin) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Admin access required"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Akses admin diperlukan"})
 		return
 	}
 
@@ -142,19 +142,19 @@ func (h *UserHandler) GetPublisher(c *gin.Context) {
 	// Check if admin
 	userType, exists := c.Get("user_type")
 	if !exists || userType != string(models.UserTypeAdmin) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Admin access required"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Akses admin diperlukan"})
 		return
 	}
 
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
 	publisher, err := h.userRepo.FindByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Publisher not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Publisher tidak ditemukan"})
 		return
 	}
 
 	if publisher.UserType != models.UserTypePublisher {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User is not a publisher"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User tidak adalah publisher"})
 		return
 	}
 
@@ -174,19 +174,19 @@ func (h *UserHandler) UpdatePublisher(c *gin.Context) {
 	// Check if admin
 	userType, exists := c.Get("user_type")
 	if !exists || userType != string(models.UserTypeAdmin) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Admin access required"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Akses admin diperlukan"})
 		return
 	}
 
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
 	publisher, err := h.userRepo.FindByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Publisher not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Publisher tidak ditemukan"})
 		return
 	}
 
 	if publisher.UserType != models.UserTypePublisher {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User is not a publisher"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User tidak adalah publisher"})
 		return
 	}
 
@@ -200,7 +200,7 @@ func (h *UserHandler) UpdatePublisher(c *gin.Context) {
 		// Check if username already exists (except current user)
 		existing, _ := h.userRepo.FindByUsername(req.Username)
 		if existing != nil && existing.ID != publisher.ID {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Username already exists"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Username sudah ada"})
 			return
 		}
 		publisher.Username = req.Username
@@ -212,12 +212,12 @@ func (h *UserHandler) UpdatePublisher(c *gin.Context) {
 
 	if req.Password != "" {
 		if len(req.Password) < 6 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Password must be at least 6 characters"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Password harus minimal 6 karakter"})
 			return
 		}
 		hashedPassword, err := services.HashPassword(req.Password)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menghash password"})
 			return
 		}
 		publisher.PasswordHash = hashedPassword
@@ -237,7 +237,7 @@ func (h *UserHandler) UpdatePublisher(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Publisher updated successfully",
+		"message": "Publisher berhasil diupdate",
 		"data":    publisher,
 	})
 }
@@ -247,19 +247,19 @@ func (h *UserHandler) DeletePublisher(c *gin.Context) {
 	// Check if admin
 	userType, exists := c.Get("user_type")
 	if !exists || userType != string(models.UserTypeAdmin) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Admin access required"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Akses admin diperlukan"})
 		return
 	}
 
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
 	publisher, err := h.userRepo.FindByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Publisher not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Publisher tidak ditemukan"})
 		return
 	}
 
 	if publisher.UserType != models.UserTypePublisher {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User is not a publisher"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User tidak adalah publisher"})
 		return
 	}
 
@@ -269,6 +269,5 @@ func (h *UserHandler) DeletePublisher(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Publisher deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Publisher berhasil dihapus"})
 }
-

@@ -74,7 +74,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 
 	category, err := h.categoryRepo.FindByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Kategori tidak ditemukan"})
 		return
 	}
 
@@ -108,7 +108,7 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	var count int64
 	database.DB.Model(&models.News{}).Where("category_id = ?", id).Count(&count)
 	if count > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot delete category with existing news"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Tidak dapat menghapus kategori dengan artikel yang ada"})
 		return
 	}
 
@@ -117,5 +117,5 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Category deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Kategori berhasil dihapus"})
 }

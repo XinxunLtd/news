@@ -66,7 +66,7 @@ func (h *TagHandler) UpdateTag(c *gin.Context) {
 
 	tag, err := h.tagRepo.FindByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Tag not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Tag tidak ditemukan"})
 		return
 	}
 
@@ -96,7 +96,7 @@ func (h *TagHandler) DeleteTag(c *gin.Context) {
 	var count int64
 	database.DB.Model(&models.News{}).Joins("JOIN news_tags ON news_tags.news_id = news.id").Where("news_tags.tag_id = ?", id).Count(&count)
 	if count > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot delete tag with existing news"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Tidak dapat menghapus tag dengan artikel yang ada"})
 		return
 	}
 
@@ -105,6 +105,5 @@ func (h *TagHandler) DeleteTag(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Tag deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Tag berhasil dihapus"})
 }
-

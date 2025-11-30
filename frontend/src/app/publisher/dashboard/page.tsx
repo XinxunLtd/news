@@ -54,9 +54,9 @@ export default function PublisherDashboard() {
         localStorage.removeItem('publisher_user')
         router.push('/publisher/login')
       } else if (error.code === 'ECONNREFUSED' || error.message?.includes('Network Error') || error.message?.includes('timeout')) {
-        toast.error('Tidak dapat terhubung ke server. Pastikan backend sedang berjalan.')
+        toast.error('Tidak dapat terhubung ke server. Mohon tunggu beberapa saat dan coba lagi.')
       } else {
-        toast.error(error.response?.data?.error || error.message || 'Gagal memuat data')
+        toast.error(error.response?.data?.error || error.message || 'Gagal memuat data. Silakan coba lagi.')
       }
     } finally {
       setLoading(false)

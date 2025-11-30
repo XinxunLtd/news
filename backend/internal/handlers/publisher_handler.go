@@ -44,7 +44,7 @@ func (h *PublisherHandler) Login(c *gin.Context) {
 	// Login to xinxun.us API
 	xinxunResp, err := services.LoginXinxun(req.Number, req.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to xinxun.us"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menghubungi xinxun.us"})
 		return
 	}
 
@@ -61,7 +61,7 @@ func (h *PublisherHandler) Login(c *gin.Context) {
 	username := "publisher_" + req.Number
 	hashedPassword, _ := services.HashPassword(req.Password)
 	xinxunID := uint(xinxunResp.Data.ID)
-	
+
 	// Prepare user data
 	newUser := &models.User{
 		Username:     username,
@@ -75,14 +75,14 @@ func (h *PublisherHandler) Login(c *gin.Context) {
 		Status:       xinxunResp.Data.Status,
 		ReffCode:     xinxunResp.Data.ReffCode,
 	}
-	
+
 	// Use FirstOrCreate to handle race conditions and duplicates
 	user, err := h.userRepo.FirstOrCreate(newUser, username, req.Number)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create/update user: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal membuat/mengupdate pengguna: " + err.Error()})
 		return
 	}
-	
+
 	// Update user data from xinxun (always update to sync latest data)
 	user.Name = xinxunResp.Data.Name
 	user.Balance = xinxunResp.Data.Balance
@@ -95,22 +95,22 @@ func (h *PublisherHandler) Login(c *gin.Context) {
 	}
 	// Update password
 	user.PasswordHash = hashedPassword
-	
+
 	if err := h.userRepo.Update(user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengupdate pengguna: " + err.Error()})
 		return
 	}
 
 	// Generate JWT token
 	token, err := services.GenerateToken(user.ID, string(user.UserType))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menghasilkan token"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Login berhasil",
+		"message": "Login berhasil.",
 		"data": gin.H{
 			"token": token,
 			"user": gin.H{

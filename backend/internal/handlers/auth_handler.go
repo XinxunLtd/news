@@ -33,18 +33,18 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	user, err := h.userRepo.FindByUsername(req.Username)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Username atau password salah"})
 		return
 	}
 
 	if !services.CheckPasswordHash(req.Password, user.PasswordHash) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Username atau password salah"})
 		return
 	}
 
 	token, err := services.GenerateToken(user.ID, string(user.UserType))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menghasilkan token"})
 		return
 	}
 
@@ -52,11 +52,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		"token": token,
 		"user": gin.H{
 			"id":        user.ID,
-			"username":   user.Username,
+			"username":  user.Username,
 			"name":      user.Name,
 			"email":     user.Email,
 			"user_type": user.UserType,
 		},
 	})
 }
-

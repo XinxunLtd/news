@@ -36,12 +36,12 @@ func (h *AdminHandler) ApproveNews(c *gin.Context) {
 
 	news, err := h.newsRepo.FindByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "News not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Artikel tidak"})
 		return
 	}
 
 	if news.Status != models.StatusPending {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "News is not pending approval"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Artiker tidak berstatus pending"})
 		return
 	}
 
@@ -54,19 +54,19 @@ func (h *AdminHandler) ApproveNews(c *gin.Context) {
 	// Get author (publisher)
 	author, err := h.userRepo.FindByID(news.AuthorID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Author not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Publisher tidak ditemukan"})
 		return
 	}
 
 	// Check if author is publisher
 	if author.UserType != models.UserTypePublisher {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Only publisher news can be approved"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Hanya artikel publisher yang dapat diapprove"})
 		return
 	}
 
 	// Check if xinxun_id exists
 	if author.XinxunID == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Publisher does not have xinxun_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Publisher tidak memiliki xinxun_id"})
 		return
 	}
 
@@ -75,7 +75,7 @@ func (h *AdminHandler) ApproveNews(c *gin.Context) {
 	if news.RevisionOf != nil {
 		originalNews, err := h.newsRepo.FindByID(*news.RevisionOf)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Original news not found"})
+			c.JSON(http.StatusNotFound, gin.H{"error": "Artikel asli tidak ditemukan"})
 			return
 		}
 
@@ -124,7 +124,7 @@ func (h *AdminHandler) ApproveNews(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"message": "Revision approved and original news updated successfully (no reward for edits)",
+			"message": "Revisi berhasil diapprove dan artikel asli berhasil diupdate (tidak ada reward untuk revisi)",
 			"data":    updatedOriginal,
 		})
 		return
@@ -148,7 +148,7 @@ func (h *AdminHandler) ApproveNews(c *gin.Context) {
 		if err != nil {
 			// Log error but don't fail the approval
 			c.JSON(http.StatusOK, gin.H{
-				"message": "News approved but reward failed",
+				"message": "Artikel berhasil diapprove tetapi reward gagal",
 				"error":   err.Error(),
 				"data":    news,
 			})
@@ -162,7 +162,7 @@ func (h *AdminHandler) ApproveNews(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "News approved successfully",
+		"message": "Artikel berhasil diapprove",
 		"data":    news,
 	})
 }
@@ -173,12 +173,12 @@ func (h *AdminHandler) RejectNews(c *gin.Context) {
 
 	news, err := h.newsRepo.FindByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "News not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Artikel tidak ditemukan"})
 		return
 	}
 
 	if news.Status != models.StatusPending {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "News is not pending approval"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Artikel tidak berstatus pending"})
 		return
 	}
 
@@ -189,7 +189,7 @@ func (h *AdminHandler) RejectNews(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "News rejected",
+		"message": "Artikel berhasil ditolak",
 		"data":    news,
 	})
 }
