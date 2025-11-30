@@ -27,6 +27,8 @@ func SetupRoutes() *gin.Engine {
 		"http://127.0.0.1:3000",
 		"http://0.0.0.0:3000",
 		"https://news.xinxun.us",
+		"https://xinxun.us",
+		"https://www.xinxun.us",
 	}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"}
 	config.AllowHeaders = []string{
