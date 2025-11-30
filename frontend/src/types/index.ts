@@ -25,6 +25,7 @@ export interface Category {
   name: string
   slug: string
   is_admin_only?: boolean
+  order?: number
   created_at: string
   updated_at: string
 }
@@ -33,6 +34,7 @@ export interface Tag {
   id: number
   name: string
   slug: string
+  order?: number
 }
 
 export interface User {

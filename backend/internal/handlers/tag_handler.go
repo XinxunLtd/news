@@ -33,7 +33,8 @@ func (h *TagHandler) GetTags(c *gin.Context) {
 }
 
 type CreateTagRequest struct {
-	Name string `json:"name" binding:"required"`
+	Name  string `json:"name" binding:"required"`
+	Order int    `json:"order"` // Urutan tampilan (optional, default akan di-set otomatis)
 }
 
 func (h *TagHandler) CreateTag(c *gin.Context) {
@@ -45,8 +46,9 @@ func (h *TagHandler) CreateTag(c *gin.Context) {
 
 	tagSlug := slug.Make(req.Name)
 	tag := &models.Tag{
-		Name: req.Name,
-		Slug: tagSlug,
+		Name:  req.Name,
+		Slug:  tagSlug,
+		Order: req.Order,
 	}
 
 	if err := h.tagRepo.Create(tag); err != nil {
@@ -58,7 +60,8 @@ func (h *TagHandler) CreateTag(c *gin.Context) {
 }
 
 type UpdateTagRequest struct {
-	Name string `json:"name"`
+	Name  string `json:"name"`
+	Order *int   `json:"order"` // Urutan tampilan (optional)
 }
 
 func (h *TagHandler) UpdateTag(c *gin.Context) {
@@ -79,6 +82,10 @@ func (h *TagHandler) UpdateTag(c *gin.Context) {
 	if req.Name != "" {
 		tag.Name = req.Name
 		tag.Slug = slug.Make(req.Name)
+	}
+
+	if req.Order != nil {
+		tag.Order = *req.Order
 	}
 
 	if err := h.tagRepo.Update(tag); err != nil {

@@ -12,7 +12,7 @@ export default function CategoriesPage() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
-  const [formData, setFormData] = useState({ name: '', is_admin_only: false })
+  const [formData, setFormData] = useState({ name: '', is_admin_only: false, order: 0 })
   const router = useRouter()
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function CategoriesPage() {
         localStorage.removeItem('admin_token')
         router.push('/admin/login')
       } else {
-        toast.error('Gagal memuat kategori')
+        toast.error('Gagal memuat kategori. Silakan coba lagi.')
       }
     } finally {
       setLoading(false)
@@ -53,16 +53,20 @@ export default function CategoriesPage() {
       }
       setShowModal(false)
       setEditingCategory(null)
-      setFormData({ name: '', is_admin_only: false })
+      setFormData({ name: '', is_admin_only: false, order: 0 })
       loadCategories()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Gagal menyimpan kategori')
+      toast.error(error.response?.data?.error || 'Gagal menyimpan kategori. Silakan coba lagi.')
     }
   }
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category)
-    setFormData({ name: category.name, is_admin_only: category.is_admin_only || false })
+    setFormData({ 
+      name: category.name, 
+      is_admin_only: category.is_admin_only || false,
+      order: category.order || 0
+    })
     setShowModal(true)
   }
 
@@ -74,7 +78,7 @@ export default function CategoriesPage() {
       toast.success('Kategori berhasil dihapus')
       loadCategories()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Gagal menghapus kategori')
+      toast.error(error.response?.data?.error || 'Gagal menghapus kategori. Silakan coba lagi.')
     }
   }
 
@@ -99,7 +103,7 @@ export default function CategoriesPage() {
           <button
             onClick={() => {
               setEditingCategory(null)
-              setFormData({ name: '', is_admin_only: false })
+              setFormData({ name: '', is_admin_only: false, order: 0 })
               setShowModal(true)
             }}
             className="btn-primary inline-flex items-center space-x-2"
@@ -111,14 +115,19 @@ export default function CategoriesPage() {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((category) => (
+          {categories.map((category, index) => (
             <div
               key={category.id}
               className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{category.name}</h3>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="text-sm font-semibold text-[#fe7d17] bg-[#fe7d17]/10 px-2 py-1 rounded">
+                      #{category.order || index + 1}
+                    </span>
+                    <h3 className="text-xl font-semibold text-gray-900">{category.name}</h3>
+                  </div>
                   <p className="text-sm text-gray-500">Slug: {category.slug}</p>
                 </div>
                 {category.is_admin_only && (
@@ -173,6 +182,24 @@ export default function CategoriesPage() {
                     required
                   />
                 </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Urutan Tampilan
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={formData.order || ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, order: parseInt(e.target.value) || 0 })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fe7d17] focus:border-transparent"
+                    placeholder="1, 2, 3, ... (kosongkan untuk otomatis)"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Urutan tampilan kategori. Angka lebih kecil akan tampil lebih dulu.
+                  </p>
+                </div>
                 <div className="mb-6">
                   <label className="flex items-center space-x-2 cursor-pointer">
                     <input
@@ -194,7 +221,7 @@ export default function CategoriesPage() {
                     onClick={() => {
                       setShowModal(false)
                       setEditingCategory(null)
-                      setFormData({ name: '', is_admin_only: false })
+                      setFormData({ name: '', is_admin_only: false, order: 0 })
                     }}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                   >

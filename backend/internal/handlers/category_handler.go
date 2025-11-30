@@ -40,6 +40,7 @@ func (h *CategoryHandler) GetCategories(c *gin.Context) {
 type CreateCategoryRequest struct {
 	Name        string `json:"name" binding:"required"`
 	IsAdminOnly bool   `json:"is_admin_only"`
+	Order       int    `json:"order"` // Urutan tampilan (optional, default akan di-set otomatis)
 }
 
 func (h *CategoryHandler) CreateCategory(c *gin.Context) {
@@ -54,6 +55,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		Name:        req.Name,
 		Slug:        categorySlug,
 		IsAdminOnly: req.IsAdminOnly,
+		Order:       req.Order,
 	}
 
 	if err := h.categoryRepo.Create(category); err != nil {
@@ -67,6 +69,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 type UpdateCategoryRequest struct {
 	Name        string `json:"name"`
 	IsAdminOnly *bool  `json:"is_admin_only"`
+	Order       *int   `json:"order"` // Urutan tampilan (optional)
 }
 
 func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
@@ -91,6 +94,10 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 
 	if req.IsAdminOnly != nil {
 		category.IsAdminOnly = *req.IsAdminOnly
+	}
+
+	if req.Order != nil {
+		category.Order = *req.Order
 	}
 
 	if err := h.categoryRepo.Update(category); err != nil {

@@ -160,13 +160,13 @@ export const adminCategoryApi = {
     return response.data
   },
 
-  create: async (data: { name: string; is_admin_only?: boolean }) => {
+  create: async (data: { name: string; is_admin_only?: boolean; order?: number }) => {
     const apiInstance = getApi()
     const response = await apiInstance.post('/admin/categories', data)
     return response.data
   },
 
-  update: async (id: number, data: { name?: string; is_admin_only?: boolean }) => {
+  update: async (id: number, data: { name?: string; is_admin_only?: boolean; order?: number }) => {
     const apiInstance = getApi()
     const response = await apiInstance.put(`/admin/categories/${id}`, data)
     return response.data
@@ -186,13 +186,13 @@ export const adminTagApi = {
     return response.data
   },
 
-  create: async (data: { name: string }) => {
+  create: async (data: { name: string; order?: number }) => {
     const apiInstance = getApi()
     const response = await apiInstance.post('/admin/tags', data)
     return response.data
   },
 
-  update: async (id: number, data: { name: string }) => {
+  update: async (id: number, data: { name?: string; order?: number }) => {
     const apiInstance = getApi()
     const response = await apiInstance.put(`/admin/tags/${id}`, data)
     return response.data

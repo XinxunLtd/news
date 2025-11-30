@@ -12,7 +12,7 @@ export default function TagsPage() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingTag, setEditingTag] = useState<Tag | null>(null)
-  const [formData, setFormData] = useState({ name: '' })
+  const [formData, setFormData] = useState({ name: '', order: 0 })
   const router = useRouter()
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function TagsPage() {
       }
       setShowModal(false)
       setEditingTag(null)
-      setFormData({ name: '' })
+      setFormData({ name: '', order: 0 })
       loadTags()
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Gagal menyimpan tag. Silakan coba lagi.')
@@ -62,7 +62,7 @@ export default function TagsPage() {
 
   const handleEdit = (tag: Tag) => {
     setEditingTag(tag)
-    setFormData({ name: tag.name })
+    setFormData({ name: tag.name, order: tag.order || 0 })
     setShowModal(true)
   }
 
@@ -99,7 +99,7 @@ export default function TagsPage() {
         <button
           onClick={() => {
             setEditingTag(null)
-            setFormData({ name: '' })
+            setFormData({ name: '', order: 0 })
             setShowModal(true)
           }}
           className="btn-primary flex items-center space-x-2"
@@ -124,6 +124,9 @@ export default function TagsPage() {
               <thead className="bg-gray-100">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Urutan
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Nama
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -135,8 +138,13 @@ export default function TagsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {tags.map((tag) => (
+                {tags.map((tag, index) => (
                   <tr key={tag.id}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-semibold text-[#fe7d17]">
+                        #{tag.order || index + 1}
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{tag.name}</div>
                     </td>
@@ -182,11 +190,29 @@ export default function TagsPage() {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ name: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                   className="input-field w-full"
                   placeholder="Contoh: Teknologi, Investasi, dll"
                 />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Urutan Tampilan
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.order || ''}
+                  onChange={(e) =>
+                    setFormData({ ...formData, order: parseInt(e.target.value) || 0 })
+                  }
+                  className="input-field w-full"
+                  placeholder="1, 2, 3, ... (kosongkan untuk otomatis)"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Urutan tampilan tag. Angka lebih kecil akan tampil lebih dulu.
+                </p>
               </div>
               <div className="flex space-x-4">
                 <button
@@ -194,7 +220,7 @@ export default function TagsPage() {
                   onClick={() => {
                     setShowModal(false)
                     setEditingTag(null)
-                    setFormData({ name: '' })
+                    setFormData({ name: '', order: 0 })
                   }}
                   className="btn-secondary flex-1"
                 >
